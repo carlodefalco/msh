@@ -1,0 +1,78 @@
+function [nodelist] = MSH2Mnodesonsides(mesh,sidelist)
+
+  ## -*- texinfo -*-
+  ## @deftypefn {Function File} {[@var{nodelist}]} = MSH2Mjoinstructm(@var{mesh},@var{sidelist})
+  ##
+  ## Gives as output a list of the nodes that lies on the sides specified as input.
+  ##
+  ## Input:
+  ## @itemize @minus
+  ## @item @var{mesh}: standard PDEtool-like mesh, with field "p", "e", "t".
+  ## @item @var{sidelist}: row vector containing the number of the sides (numbering referred to mesh.e(5,:)).
+  ## @end itemize
+  ##
+  ## Output:
+  ## @itemize @minus
+  ## @item @var{nodelist}: list of the nodes that lies on the specified sides.
+  ## @end itemize 
+  ##
+  ## @seealso{MSH2Mgeomprop,MSH2Mtopprop}
+  ## @end deftypefn
+
+  ## This file is part of 
+  ##
+  ##                   MSH - Meshing Software Package for Octave
+  ##      -------------------------------------------------------------------
+  ##              Copyright (C) 2007  Carlo de Falco and Culpo Massimiliano
+  ## 
+  ##   MSH is free software; you can redistribute it and/or modify
+  ##   it under the terms of the GNU General Public License as published by
+  ##   the Free Software Foundation; either version 2 of the License, or
+  ##   (at your option) any later version.
+  ## 
+  ##   MSH is distributed in the hope that it will be useful,
+  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ##   GNU General Public License for more details.
+  ## 
+  ##   You should have received a copy of the GNU General Public License
+  ##   along with MSH; if not, write to the Free Software
+  ##   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+  ##   USA
+  ##
+  ##
+  ##   MAIN AUTHOR:
+  ##   Carlo de Falco
+  ##   Bergische Universität Wuppertal
+  ##   Fachbereich C - Mathematik und Naturwissenschaften
+  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
+  ##   D-42119 Wuppertal, Germany
+  ##
+  ##   AID IN PROGRAMMING AND CLEANING THE CODE: 
+  ##   Culpo Massimiliano
+  ##   Bergische Universität Wuppertal
+  ##   Fachbereich C - Mathematik und Naturwissenschaften
+  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
+  ##   D-42119 Wuppertal, Germany
+
+
+  edgelist    =[];
+
+  for ii = 1:length(sidelist)
+    edgelist=[edgelist,find(mesh.e(5,:)==sidelist(ii))];
+  end
+
+  ##Set list of nodes with Dirichelet BCs
+  nodelist = mesh.e(1:2,edgelist);
+  nodelist = [nodelist(1,:) nodelist(2,:)];
+  nodelist = unique(nodelist);
+
+endfunction
+
+%!test
+%! [mesh1] = MSH2Mstructmesh(0:.5:1, 0:.5:1, 1, 1:4, 'left');
+%! [mesh2] = MSH2Mstructmesh(1:.5:2, 0:.5:1, 1, 1:4, 'left');
+%! [mesh] = MSH2Mjoinstructm(mesh1,mesh2,2,4);
+%! [nodelist] = MSH2Mnodesonsides(mesh,[1 2]);
+%! reallist = [1   4   7   8   9];
+%! assert(nodelist,reallist);
