@@ -12,7 +12,7 @@ function [varargout] = MSH2Mtopprop(mesh,varargin)
   ## @itemize @bullet
   ## @item "n" (neighbor trgs matrix): 3(local edge number) times number of elements matrix.
   ##                                       It contains for every edge the number of the corresponding neighbouring trg.
-  ##                                       If the trg edge is on the geometrical border NaN is returned.
+  ##                                       If the trg edge is on the geometrical boundary NaN is returned.
   ## @item "sides" (global edge matrix): 2 times number of total edges matrix
   ##                                     It contains for every edge the number of the two points identifying it.
   ## @item "ts" (trg sides matrix): 3 times number of elements matrix.
@@ -21,7 +21,7 @@ function [varargout] = MSH2Mtopprop(mesh,varargin)
   ##                                      It contains for every edge of the "sides" structure the numbers of the trg sharing it.
   ##                                      If only one element shares the edge, NaN is returned in the second row.
   ## @item "coinc" (coincident circumcenter matrix): 2 times [] matrix containing the list of elements with coincident circumcenter.
-  ## @item "border" (border edge matrix): 2 times number of borderedge matrix.
+  ## @item "boundary" (boundary edge matrix): 2 times number of boundary edge matrix.
   ##                                      It contains in the first row the element number, in the second the local edge number.
   ## @end itemize
   ## @end itemize 
@@ -117,9 +117,9 @@ function [varargout] = MSH2Mtopprop(mesh,varargin)
         clear b
       endif
 
-    case "border"
-      if isfield(mesh,'border')
-        varargout{nn} = mesh.border;
+    case "boundary"
+      if isfield(mesh,'boundary')
+        varargout{nn} = mesh.boundary;
       else
         [b] = borderline(e,t);
         varargout{nn} = b;
@@ -199,30 +199,41 @@ function [output] = borderline(e,t)
   
   nelem = columns(e);
   t = t(1:3,:);
-  output = zeros(2,nelem);
+  output = zeros(4,nelem);
   for ii = 1:nelem
+
     point = ( e(1,ii) == t );
     point += ( e(2,ii) == t );
+
     [jj1] = find( sum(point(2:3,:)) == 2);
     [jj2] = find( sum(point([3 1],:)) == 2);
     [jj3] = find( sum(point(1:2,:)) == 2);
-    assert( (length(jj1) + length(jj2) + length(jj3)), 1 );
-    if ~(isempty(jj1))
-      output(1,ii) = jj1;
-      output(2,ii) = 1;
-    elseif ~(isempty(jj2))
-      output(1,ii) = jj2;
-      output(2,ii) = 2;
-    elseif ~(isempty(jj3))
-      output(1,ii) = jj3;
-      output(2,ii) = 3;
-    endif
+
+    assert( (length(jj1) + length(jj2) + length(jj3)) <= 2 );
+
+    numtrg = 0;
+    for jj=1:length(jj1)
+      output(2*numtrg+1,ii) = jj1(jj);
+      output(2*numtrg+2,ii) = 1;
+      numtrg += 1;
+    end
+    for jj=1:length(jj2)
+      output(2*numtrg+1,ii) = jj2(jj);
+      output(2*numtrg+2,ii) = 2;
+      numtrg += 1;
+    end
+    for jj=1:length(jj3)
+      output(2*numtrg+1,ii) = jj3(jj);
+      output(2*numtrg+2,ii) = 3;
+      numtrg += 1;
+    end
+
   endfor
 endfunction
 
 %!test
 %! [mesh] = MSH2Mstructmesh(0:.5:1, 0:.5:1, 1, 1:4, 'left');
-%! [mesh.n,mesh.sides,mesh.ts,mesh.tws,mesh.coinc,mesh.border] = MSH2Mtopprop(mesh,'n','sides','ts','tws','coinc','border');
+%! [mesh.n,mesh.sides,mesh.ts,mesh.tws,mesh.coinc,mesh.boundary] = MSH2Mtopprop(mesh,'n','sides','ts','tws','coinc','boundary');
 %! n = [5     6     7     8     3     4   NaN   NaN
 %!    NaN   NaN     5     6     2   NaN     4   NaN
 %!    NaN     5   NaN     7     1     2     3     4];
@@ -235,14 +246,16 @@ endfunction
 %!       NaN   NaN   NaN     1     5     2   NaN     5   NaN     6     3     7     4   NaN   NaN   NaN];
 %! coinc = [1   2   3   4
 %!          5   6   7   8];
-%! border = [1   3   7   8   6   8   1   2
-%!           3   3   1   1   2   2   2   2];
+%! boundary =[ 1   3   7   8   6   8   1   2
+%!             3   3   1   1   2   2   2   2
+%!             0   0   0   0   0   0   0   0
+%!             0   0   0   0   0   0   0   0];
 %! assert(mesh.n,n);
 %! assert(mesh.sides,sides);
 %! assert(mesh.ts,ts);
 %! assert(mesh.tws,tws);
 %! assert(mesh.coinc,coinc);
-%! assert(mesh.border,border);
+%! assert(mesh.boundary,boundary);
 
 %!test
 %! mesh.p = []; mesh.e = [];

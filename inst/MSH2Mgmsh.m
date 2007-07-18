@@ -87,20 +87,16 @@ function [mesh] = MSH2Mgmsh(geometry,scalefactor,refine)
   system(["gmsh -format msh1 -2 -scale " num2str(scalefactor) " -clscale ",...
 	num2str(refine) " " geometry ".geo"]);
 
-  mesh = Umsh2pdetool(geometry);
+  mesh = msh2pdetool(geometry);
 
 endfunction
 
+
+function msh=msh2pdetool(filename);
 #CONVERTS THE MESH FROM GMSH FORMAT TO  PDETOOL-LIKE ONE
-function msh=Umsh2pdetool(filename);
 
-##
-##
-##  loadgmshmesh(filename);
-##
-##
-
-awk_command = "BEGIN {  filename = ARGV[1] ; gsub(/\\./,""_"",filename) }\n\
+awk_command =...
+ "BEGIN {  filename = ARGV[1] ; gsub(/\\./,""_"",filename) }\n\
 \n\
 /\\$NOD/,/\\$ENDNOD/ { \n\
     if ( FNR>2 ) \n\
@@ -147,10 +143,17 @@ awk_command = "BEGIN {  filename = ARGV[1] ; gsub(/\\./,""_"",filename) }\n\
 { }";
 
 system(["awk '" awk_command "' " filename ".msh"]);
+
 eval([ filename "_msh_p"]);
 eval([ filename "_msh_e"]);
 eval([ filename "_msh_t"]);
 
 
 msh=struct("p",p',"t",t',"e",e');
+msh.be = MSH2Mtopprop(msh, "boundary")
+msh.be
+msh.e(6,:) = msh.t(4,msh.be(1,:));
+jj = find (sum(msh.be>0)==4)
+msh.e(7,jj) = msh.t(4,msh.be(3,jj));
+
 endfunction
