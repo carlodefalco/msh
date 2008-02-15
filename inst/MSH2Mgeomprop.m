@@ -3,7 +3,7 @@ function [varargout] = MSH2Mgeomprop(mesh,varargin)
   ## -*- texinfo -*-
   ## @deftypefn {Function File} {[@var{varargout}]} = MSH2Mgeomprop(@var{mesh},[@var{string1},@var{string2},...])
   ##
-  ## Computes useful geometrical properties of the specified mesh
+  ## Computes geometrical properties of the specified mesh
   ##
   ## Input:
   ## @itemize @minus
@@ -49,14 +49,13 @@ function [varargout] = MSH2Mgeomprop(mesh,varargin)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHOR:
+  ##   MAIN AUTHORS:
   ##   Culpo Massimiliano
   ##   Bergische Universität Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
   ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
   ##   D-42119 Wuppertal, Germany
   ##
-  ##   VERY USEFUL TEACHINGS IN PROGRAMMING AND CLEANING THE CODE:
   ##   Carlo de Falco
   ##   Bergische Universität Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
@@ -336,7 +335,8 @@ function [b] = computearea(p,e,t,string)
 
   degen=find(jacdet <= 0);
   if ~isempty(degen)
-    fprintf(1,'invalid mesh element:  %d  fixing...\n',degen);
+    ## XXX FIXME: there should be a -verbose option to allow to see this
+    ##fprintf(1,'invalid mesh element:  %d  fixing...\n',degen);
     t(1:3,degen) = t([2,1,3],degen);
     jac([1,2],degen) = [p(1,t(2,degen))-p(1,t(1,degen));
 	  	      p(1,t(3,degen))-p(1,t(1,degen))];

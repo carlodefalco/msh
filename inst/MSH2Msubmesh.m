@@ -43,14 +43,13 @@ function [omesh,nodelist,elementlist] = MSH2Msubmesh(imesh,intrfc,sdl)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHOR:
+  ##   MAIN AUTHORS:
   ##   Carlo de Falco
   ##   Bergische Universität Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
   ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
   ##   D-42119 Wuppertal, Germany
   ##
-  ##   AID IN PROGRAMMING AND CLEANING THE CODE: 
   ##   Culpo Massimiliano
   ##   Bergische Universität Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften

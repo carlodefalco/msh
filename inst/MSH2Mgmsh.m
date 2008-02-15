@@ -64,14 +64,13 @@ function [mesh] = MSH2Mgmsh(geometry,scalefactor,refine)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHOR:
+  ##   MAIN AUTHORS:
   ##   Carlo de Falco
   ##   Bergische Universität Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
   ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
   ##   D-42119 Wuppertal, Germany
   ##
-  ##   AID IN PROGRAMMING AND CLEANING THE CODE: 
   ##   Culpo Massimiliano
   ##   Bergische Universität Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
@@ -148,10 +147,10 @@ eval([ filename "_msh_t"]);
 
 
 msh=struct("p",p',"t",t',"e",e');
-msh.be = MSH2Mtopprop(msh, "boundary")
-msh.be
+msh.be = MSH2Mtopprop(msh, "boundary");
+msh.be;
 msh.e(6,:) = msh.t(4,msh.be(1,:));
-jj = find (sum(msh.be>0)==4)
+jj = find (sum(msh.be>0)==4);
 msh.e(7,jj) = msh.t(4,msh.be(3,jj));
 
 endfunction

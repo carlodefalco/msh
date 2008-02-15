@@ -1,7 +1,7 @@
 function [nodelist] = MSH2Mnodesonsides(mesh,sidelist)
 
   ## -*- texinfo -*-
-  ## @deftypefn {Function File} {[@var{nodelist}]} = MSH2Mjoinstructm(@var{mesh},@var{sidelist})
+  ## @deftypefn {Function File} {[@var{nodelist}]} = MSH2Mnodesonsides(@var{mesh},@var{sidelist})
   ##
   ## Gives as output a list of the nodes that lies on the sides specified as input.
   ##
@@ -39,14 +39,13 @@ function [nodelist] = MSH2Mnodesonsides(mesh,sidelist)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHOR:
+  ##   MAIN AUTHORS:
   ##   Carlo de Falco
   ##   Bergische Universität Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
   ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
   ##   D-42119 Wuppertal, Germany
   ##
-  ##   AID IN PROGRAMMING AND CLEANING THE CODE: 
   ##   Culpo Massimiliano
   ##   Bergische Universität Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
