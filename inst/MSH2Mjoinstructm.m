@@ -3,7 +3,8 @@ function [mesh] = MSH2Mjoinstructm(mesh1,mesh2,s1,s2)
   ## -*- texinfo -*-
   ## @deftypefn {Function File} {[@var{mesh}]} = MSH2Mjoinstructm(@var{mesh1},@var{mesh2},@var{s1},@var{s2})
   ##
-  ## Join two consequents meshes. Gives as output the PDE-tool like mesh structure.
+  ## Join two structured meshes (created by MSH2Mstructmesh) into one
+  ## mesh structure variable.
   ##
   ## Input:
   ## @itemize @minus
@@ -41,18 +42,18 @@ function [mesh] = MSH2Mjoinstructm(mesh1,mesh2,s1,s2)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHORS:
+  ##   AUTHORS:
   ##   Carlo de Falco
-  ##   Bergische Universität Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
-  ##   D-42119 Wuppertal, Germany
+  ##   Dublin City University
+  ##   School of Mathemetical Sciences
+  ##   Ireland
   ##
   ##   Culpo Massimiliano
-  ##   Bergische Universität Wuppertal
+  ##   Bergische Universitaett Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
+  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
   ##   D-42119 Wuppertal, Germany
+
 
   ## make sure that the outside world is always 
   ## on the same side of the boundary of mesh1

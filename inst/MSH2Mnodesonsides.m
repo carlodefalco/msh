@@ -1,9 +1,11 @@
 function [nodelist] = MSH2Mnodesonsides(mesh,sidelist)
 
   ## -*- texinfo -*-
-  ## @deftypefn {Function File} {[@var{nodelist}]} = MSH2Mnodesonsides(@var{mesh},@var{sidelist})
+  ## @deftypefn {Function File} {[@var{nodelist}]} =@
+  ## MSH2Mnodesonsides(@var{mesh}, @var{sidelist})
   ##
-  ## Gives as output a list of the nodes that lies on the sides specified as input.
+  ## Returns a list of the nodes lying on the sides @var{sidelist} of
+  ## the mesh @var{mesh}.
   ##
   ## Input:
   ## @itemize @minus
@@ -39,18 +41,18 @@ function [nodelist] = MSH2Mnodesonsides(mesh,sidelist)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHORS:
+  ##   AUTHORS:
   ##   Carlo de Falco
-  ##   Bergische Universität Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
-  ##   D-42119 Wuppertal, Germany
+  ##   Dublin City University
+  ##   School of Mathemetical Sciences
+  ##   Ireland
   ##
   ##   Culpo Massimiliano
-  ##   Bergische Universität Wuppertal
+  ##   Bergische Universitaett Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
+  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
   ##   D-42119 Wuppertal, Germany
+
 
 
   edgelist    =[];

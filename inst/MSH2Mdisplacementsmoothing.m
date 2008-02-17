@@ -6,16 +6,18 @@ function [Ax,Ay] = MSH2Mdisplacementsmoothing(msh, k)
   ##
   ## To displace the boundary of a 2D mesh, set a spring with
   ## force/length constant @var{k} along each edge and enforce
-  ## equilibrium. This function builds matrices containing the resulting
+  ## equilibrium.
+  ##
+  ## This function builds matrices containing the resulting
   ## (linearized) equation for x and y coordinates of each mesh node.
   ## Boundary conditions enforcing the displacement (Dirichlet type
   ## problem) or the force (Neumann type) at the boundary must be added
   ## to make the system solvable, e.g.:
   ##
   ## @example
-  ## msh = MSH2Mstructmesh(linspace(0,1,10),
-  ##                      linspace(0,1,10),
-  ##                      1,1:4,"left");
+  ## msh = MSH2Mstructmesh(linspace(0,1,10),@
+  ## linspace(0,1,10),@
+  ## 1,1:4, "left");
   ## dnodes = MSH2Mnodesonsides(msh,1:4);
   ## varnodes = setdiff([1:columns(msh.p)],dnodes);
   ## xd = msh.p(1,dnodes)';
@@ -36,6 +38,8 @@ function [Ax,Ay] = MSH2Mdisplacementsmoothing(msh, k)
   ##  pause(.01)
   ## endfor
   ## @end example
+  ##
+  ## @seealso{MSH2Mjigglemesh}
   ##
   ## @end deftypefn
   
@@ -61,17 +65,16 @@ function [Ax,Ay] = MSH2Mdisplacementsmoothing(msh, k)
   ##   USA
   ##
   ##
-  ##   MAIN AUTHORS:
+  ##   AUTHORS:
   ##   Carlo de Falco
-  ##   Bergische Universität Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
-  ##   D-42119 Wuppertal, Germany
+  ##   Dublin City University
+  ##   School of Mathemetical Sciences
+  ##   Ireland
   ##
   ##   Culpo Massimiliano
-  ##   Bergische Universität Wuppertal
+  ##   Bergische Universitaett Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
+  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
   ##   D-42119 Wuppertal, Germany
 
   x  = msh.p(1,:);

@@ -3,7 +3,7 @@ function [varargout] = MSH2Mtopprop(mesh,varargin)
   ## -*- texinfo -*-
   ## @deftypefn {Function File} {[@var{varargout}]} = MSH2Mtopprop(@var{mesh}, [@var{string1}, @var{string2},...])
   ##
-  ## Computes useful topological properties of the specified mesh
+  ## Computes some topological properties of the  mesh @var{mesh}.
   ##
   ## Input:
   ## @itemize @minus
@@ -50,17 +50,16 @@ function [varargout] = MSH2Mtopprop(mesh,varargin)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHORS:
-  ##
+  ##   AUTHORS:
   ##   Carlo de Falco
-  ##   Bergische Universität Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
-  ##   D-42119 Wuppertal, Germany
+  ##   Dublin City University
+  ##   School of Mathemetical Sciences
+  ##   Ireland
   ##
   ##   Culpo Massimiliano
-  ##   Bergische Universität Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften�r AngewArbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
+  ##   Bergische Universitaett Wuppertal
+  ##   Fachbereich C - Mathematik und Naturwissenschaften
+  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
   ##   D-42119 Wuppertal, Germany
 
   p = mesh.p; e = mesh.e; t = mesh.t;

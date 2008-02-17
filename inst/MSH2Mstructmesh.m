@@ -3,7 +3,8 @@ function [mesh] = MSH2Mstructmesh(x,y,region,sides,varargin)
   ## -*- texinfo -*-
   ## @deftypefn {Function File} {[@var{mesh}]} = MSH2Mstructmesh(@var{x},@var{y},@var{region},@var{sides},@var{string})
   ##
-  ## Constructs a structured 2D mesh on a rectangular domain, and gives as output the PDE-tool mesh structure.
+  ## Constructs a structured triangular 2D mesh on a rectangular domain,
+  ## and returns a PDEtool-like mesh structure.
   ##
   ## Input:
   ## @itemize @minus
@@ -64,17 +65,16 @@ function [mesh] = MSH2Mstructmesh(x,y,region,sides,varargin)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHORS:
+  ##   AUTHORS:
   ##   Carlo de Falco
-  ##   Bergische Universität Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
-  ##   D-42119 Wuppertal, Germany
+  ##   Dublin City University
+  ##   School of Mathemetical Sciences
+  ##   Ireland
   ##
   ##   Culpo Massimiliano
-  ##   Bergische Universität Wuppertal
+  ##   Bergische Universitaett Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
+  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
   ##   D-42119 Wuppertal, Germany
 
   default = 'right';
