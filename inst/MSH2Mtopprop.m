@@ -57,7 +57,7 @@ function [varargout] = MSH2Mtopprop(mesh,varargin)
   ##   Ireland
   ##
   ##   Culpo Massimiliano
-  ##   Bergische Universitaett Wuppertal
+  ##   Bergische Universitaet Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
   ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
   ##   D-42119 Wuppertal, Germany

@@ -37,17 +37,16 @@ function msh2 = MSH2Mmeshalongspline(xc,yc,Nnx,Nny,sigma)
   ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
   ##
   ##
-  ##   MAIN AUTHORS:
-  ##   Culpo Massimiliano
-  ##   Bergische Universität Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gaußstr. 20 
-  ##   D-42119 Wuppertal, Germany
-  ##
+  ##   AUTHORS:
   ##   Carlo de Falco
-  ##   Bergische Universität Wuppertal
+  ##   Dublin City University
+  ##   School of Mathemetical Sciences
+  ##   Ireland
+  ##
+  ##   Culpo Massimiliano
+  ##   Bergische Universitaet Wuppertal
   ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe für Angewandte MathematD-42119 Wuppertal  Gauupper. 20 
+  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
   ##   D-42119 Wuppertal, Germany
 
   s    =  [0; cumsum(sqrt(diff(xc).^2+diff(yc).^2))];
