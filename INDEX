@@ -8,3 +8,6 @@ Mesh properties
   MSH2Mgeomprop
   MSH2Mtopprop
   MSH2Mnodesonsides
+Mesh adaptation
+  MSH2Mequalizemesh
+  MSH2Mdisplacementsmoothing
