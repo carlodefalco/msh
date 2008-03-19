@@ -5,15 +5,8 @@ function [Ax,Ay,Bx,By] = MSH2Mequalizemesh(msh)
   ## @deftypefn {Function File} {[@var{Ax}, @var{Ay}, @var{bx}, @
   ## @var{by}]} = MSH2Mequalizemesh(@var{msh})
   ##
-  ## To equalize the size of  triangle edges, set a spring of equilibrium
-  ## length @var{factor}*@var{area} along each edge of the mesh and solve for
-  ## equilibrium.
-  ##
-  ## This function builds matrices containing the resulting
-  ## (linearized) equation for x and y coordinates of each mesh node.
-  ## Boundary conditions enforcing the displacement (Dirichlet type
-  ## problem) or the force (Neumann type) at the boundary must be added
-  ## separately to make the system solvable.
+  ## To equalize the size of  triangle edges, move each node to the
+  ## center of mass of the patch of triangles to which it belongs.
   ##
   ## May be useful when distorting a mesh, e.g.:
   ##
@@ -95,17 +88,6 @@ function [Ax,Ay,Bx,By] = MSH2Mequalizemesh(msh)
   x  = msh.p(1,:);
   y  = msh.p(2,:);
 
-#   dx  = (x(msh.t([1 2 3],:))-x(msh.t([2 3 1],:)));
-#   dy  = (y(msh.t([1 2 3],:))-y(msh.t([2 3 1],:)));
-#   dx2 = dx.^2;
-#   dy2 = dy.^2;
-
-#   l2  = dx2 + dy2;
-#   l   = sqrt(l2);
-#   area  = MSH2Mgeomprop(msh,'area');
-#   l0    = factor * sqrt(area) ([1 1 1],:);
-
-
   Ax = spalloc(length(x),length(x),1);
   Ay = spalloc(length(x),length(x),1);
 
@@ -124,9 +106,6 @@ function [Ax,Ay,Bx,By] = MSH2Mequalizemesh(msh)
 
   for ii=1:3  
     
-#     bx (ii,:) = ((l0(ii,:)-l(ii,:))./l(ii,:)) .* dx(ii,:);
-#     by (ii,:) = ((l0(ii,:)-l(ii,:))./l(ii,:)) .* dy(ii,:);
-
     for jj=ii+1:3
       
       ax(ii,jj,:) = ax(jj,ii,:) = -ones(1,1,nel);
