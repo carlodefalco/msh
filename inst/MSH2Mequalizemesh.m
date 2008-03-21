@@ -1,50 +1,17 @@
-function [Ax,Ay,Bx,By] = MSH2Mequalizemesh(msh)
+function [msh] = MSH2Mequalizemesh(msh)
 
 
   ## -*- texinfo -*-
   ## @deftypefn {Function File} {[@var{Ax}, @var{Ay}, @var{bx}, @
   ## @var{by}]} = MSH2Mequalizemesh(@var{msh})
   ##
-  ## To equalize the size of  triangle edges, move each node to the
+  ## To equalize the size of  triangle edges, apply a baricentric@
+  ## regularization, i.e. move each node to the @
   ## center of mass of the patch of triangles to which it belongs.
   ##
-  ## May be useful when distorting a mesh, e.g.:
+  ## May be useful when distorting a mesh, 
+  ## type @code{ demo MSH2Mequalizemesh } to see some examples. 
   ##
-  ## @example
-  ##  
-  ## msh = MSH2Mstructmesh(linspace(0,1,10),@
-  ## linspace(0,1,10),@
-  ## 1,1:4,"random");
-  ## dnodes = MSH2Mnodesonsides(msh,1:4);
-  ## varnodes = setdiff([1:columns(msh.p)],dnodes);
-  ## xd = msh.p(1,dnodes)';
-  ## yd = msh.p(2,dnodes)';
-  ## dx = dy = zeros(columns(msh.p),1);
-  ## dytot = dxtot = -.4*sin(xd.*yd*pi/2);
-  ## Nsteps = 10;
-  ## for ii=1:Nsteps
-  ##  dx(dnodes) = dxtot;
-  ##  dy(dnodes) = dytot;
-  ##  [Ax,Ay] = MSH2Mdisplacementsmoothing(msh,1);
-  ##  dx(varnodes) = Ax(varnodes,varnodes) \ ...
-  ##      (-Ax(varnodes,dnodes)*dx(dnodes));
-  ##  dy(varnodes) = Ay(varnodes,varnodes) \ ...
-  ##  (-Ay(varnodes,dnodes)*dy(dnodes));
-  ##  msh.p(1,:) += dx'/Nsteps;
-  ##  msh.p(2,:) += dy'/Nsteps;
-  ##  dx(dnodes) = 0;
-  ##  dy(dnodes) = 0;
-  ##  [AX, AY, BX,  BY] = MSH2Mequalizemesh(msh, .1);
-  ##  dx(varnodes) = Ax(varnodes,varnodes) \ ...
-  ##      (BX(varnodes)-Ax(varnodes,dnodes)*dx(dnodes));
-  ##  dy(varnodes) = Ay(varnodes,varnodes) \ ...
-  ##  (BY(varnodes)-Ay(varnodes,dnodes)*dy(dnodes));
-  ##  msh.p(1,:) += dx';
-  ##  msh.p(2,:) += dy';
-  ##  triplot(msh.t(1:3,:)',msh.p(1,:)',msh.p(2,:)');
-  ##  pause(.01)
-  ## endfor
-  ## @end example
   ## @seealso{MSH2Mdisplacementsmoothing}
   ##
   ## @end deftypefn
@@ -85,16 +52,17 @@ function [Ax,Ay,Bx,By] = MSH2Mequalizemesh(msh)
 
   nel= columns(msh.t);
 
-  x  = msh.p(1,:);
-  y  = msh.p(2,:);
+  x  = msh.p(1,:)';
+  y  = msh.p(2,:)';
+
+  dnodes = unique(msh.e(1:2,:)(:));
+  varnodes = setdiff([1:columns(msh.p)],dnodes);
 
   Ax = spalloc(length(x),length(x),1);
   Ay = spalloc(length(x),length(x),1);
 
   ax = zeros(3,3,nel);
   ay = zeros(3,3,nel);
-  bx = spalloc(3,nel,0);
-  by = spalloc(3,nel,0);
 
   for inode=1:3
     giinode(inode,:)=msh.t(inode,:);
@@ -121,9 +89,11 @@ function [Ax,Ay,Bx,By] = MSH2Mequalizemesh(msh)
 
   Ax = sparse(ginode(:),gjnode(:),ax(:));
   Ay = sparse(ginode(:),gjnode(:),ay(:));
-  Bx = sparse(giinode(:),1,bx(:));
-  By = sparse(giinode(:),1,by(:));
 
+  x(varnodes) = Ax(varnodes,varnodes) \ (-Ax(varnodes,dnodes)*x(dnodes));
+  y(varnodes) = Ay(varnodes,varnodes) \ (-Ay(varnodes,dnodes)*y(dnodes));
+  msh.p(1,:) = x';
+  msh.p(2,:) = y';
 
 %!demo
 %! ### equalize a structured mesh without moving boundary nodes
@@ -132,11 +102,7 @@ function [Ax,Ay,Bx,By] = MSH2Mequalizemesh(msh)
 %! varnodes = setdiff([1:columns(msh.p)],dnodes);
 %! x = msh.p(1,:)';
 %! y = msh.p(2,:)';
-%! [AX, AY, BX,  BY] = MSH2Mequalizemesh(msh);
-%! x(varnodes) = AX(varnodes,varnodes) \ (BX(varnodes)-AX(varnodes,dnodes)*x(dnodes));
-%! y(varnodes) = AY(varnodes,varnodes) \ (BY(varnodes)-AY(varnodes,dnodes)*y(dnodes));
-%! msh.p(1,:) = x';
-%! msh.p(2,:) = y';
+%! msh = MSH2Mequalizemesh(msh);
 %! triplot(msh.t(1:3,:)',msh.p(1,:)',msh.p(2,:)');
 %! pause(.01)
 
@@ -164,11 +130,7 @@ function [Ax,Ay,Bx,By] = MSH2Mequalizemesh(msh)
 %!  pause(.5)
 %! x = msh.p(1,:)';
 %! y = msh.p(2,:)';
-%! [AX, AY, BX,  BY] = MSH2Mequalizemesh(msh);
-%! x(varnodes) = AX(varnodes,varnodes) \ (BX(varnodes)-AX(varnodes,dnodes)*x(dnodes));
-%! y(varnodes) = AY(varnodes,varnodes) \ (BY(varnodes)-AY(varnodes,dnodes)*y(dnodes));
-%! msh.p(1,:) = x';
-%! msh.p(2,:) = y';
+%! msh = MSH2Mequalizemesh(msh);
 %! hold on;triplot(msh.t(1:3,:)',msh.p(1,:)',msh.p(2,:)');hold off
 %!  pause(.5)
 %! endfor

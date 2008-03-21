@@ -3,26 +3,43 @@ function [varargout] = MSH2Mtopprop(mesh,varargin)
   ## -*- texinfo -*-
   ## @deftypefn {Function File} {[@var{varargout}]} = MSH2Mtopprop(@var{mesh}, [@var{string1}, @var{string2},...])
   ##
-  ## Computes some topological properties of the  mesh @var{mesh}.
+  ## Computes some topological properties of the mesh @var{mesh}.
   ##
   ## Input:
   ## @itemize @minus
-  ## @item @var{mesh}: standard PDEtool-like mesh, with field "p", "e", "t".
-  ## @item @var{string1}, @var{string2},...: identifier of the property to compute. Possible choices are listed below.
+  ## @item @var{mesh}: mesh structure with (at least) fields @code{p},
+  ## @code{e} and @code{t} a detailed in the help for @code{MSH2Mstructmesh}.
+  ## @item @var{string1}, @var{string2},...: properties to compute,
+  ## available choices are:
+  ##
   ## @itemize @bullet
-  ## @item "n" (neighbor trgs matrix): 3(local edge number) times number of elements matrix.
-  ##                                       It contains for every edge the number of the corresponding neighbouring trg.
-  ##                                       If the trg edge is on the geometrical boundary NaN is returned.
-  ## @item "sides" (global edge matrix): 2 times number of total edges matrix
-  ##                                     It contains for every edge the number of the two points identifying it.
-  ## @item "ts" (trg sides matrix): 3 times number of elements matrix.
-  ##                                It contains for every element edge the number of the corresponding "sides" element.
-  ## @item "tws" (trg with sides matrix): 2 times number of total edges matrix.
-  ##                                      It contains for every edge of the "sides" structure the numbers of the trg sharing it.
-  ##                                      If only one element shares the edge, NaN is returned in the second row.
-  ## @item "coinc" (coincident circumcenter matrix): 2 times [] matrix containing the list of elements with coincident circumcenter.
-  ## @item "boundary" (boundary edge matrix): 2 times number of boundary edge matrix.
-  ##                                      It contains in the first row the element number, in the second the local edge number.
+  ## @item "n" (neighbouring triangles): a matrix @code{M} of size 3 by
+  ##  the number of elements. Element @code{M(i,j)} will be the index of
+  ##  the mesh element sharing with elemnt number @code{j} its
+  ## @code{i}-th edge if no such element exists (i.e. for boundary
+  ##  edges) a value of @code{NaN} is set.
+  ## @item "sides" (global edge matrix): a matrix @code{M} of size 2 by
+  ##  total number of edges. Element @code{M(i,j)} will be the index of
+  ##  the vertex at the @code{i}-th end of the @code{j}-th edge. 
+  ## @item "ts" (triangle sides matrix): a matrix @code{M} of size 3 by
+  ##  number of elements. Element @code{M(i,j)} will be the index of the
+  ##  @code{i}-th side of the @code{j}-th mesh element.
+  ##  @item "tws" (trg with sides matrix):a matrix @code{M} of size 2 by
+  ##  the total number of edges.
+  ##  @code{M(:,j)} will the set of indeces of the mesh
+  ##  elements to whose boundary the @code{j}-th mesh edge belongs.
+  ##  For an edge @code{j} belonging to one triangle onlly (an external
+  ##  boundary edge)  @code{M(2,j) = NaN}.
+  ## @item "coinc" (coincident circumcenter matrix): a matrix @code{M}
+  ##  with 2 rows.
+  ##  Each column will contain the indices of two triangles sharing the
+  ##  same circumcenter.
+  ## @item "boundary" (boundary edge matrix): a matrix @code{M} of size 2
+  ##  times the total number of boundary edges.
+  ##  @code{M(1,:)} will be the set of mesh elements (possibly repeated)
+  ##  with at least one edge belonging to the external boundary.
+  ##  @code{0 < M(2,j) < 4} will be the (local) index of an edge of the
+  ##  @code{j}-th mesh element that lies on the external boundary.   
   ## @end itemize
   ## @end itemize 
   ##
