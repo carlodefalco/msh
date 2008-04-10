@@ -21,7 +21,8 @@ function msh2 = MSH2Mmeshalongspline(xc,yc,Nnx,Nny,sigma)
   ##
   ##                   MSH - Meshing Software Package for Octave
   ##      -------------------------------------------------------------------
-  ##              Copyright (C) 2007  Carlo de Falco and Culpo Massimiliano
+  ##              Copyright (C) 2007  Carlo de Falco
+  ##              Copyright (C) 2007  Culpo Massimiliano
   ## 
   ##   MSH is free software; you can redistribute it and/or modify
   ##   it under the terms of the GNU General Public License as published by

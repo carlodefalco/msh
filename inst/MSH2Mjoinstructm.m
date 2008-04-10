@@ -26,7 +26,8 @@ function [mesh] = MSH2Mjoinstructm(mesh1,mesh2,s1,s2)
   ##
   ##                   MSH - Meshing Software Package for Octave
   ##      -------------------------------------------------------------------
-  ##              Copyright (C) 2007  Carlo de Falco and Culpo Massimiliano
+  ##              Copyright (C) 2007  Carlo de Falco
+  ##              Copyright (C) 2007  Culpo Massimiliano
   ## 
   ##   MSH is free software; you can redistribute it and/or modify
   ##   it under the terms of the GNU General Public License as published by

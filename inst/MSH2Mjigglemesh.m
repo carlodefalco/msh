@@ -23,7 +23,8 @@ function [msh] = MSH2Mjigglemesh(msh, steps)
   ##
   ##                   MSH - Meshing Software Package for Octave
   ##      -------------------------------------------------------------------
-  ##              Copyright (C) 2007  Carlo de Falco and Culpo Massimiliano
+  ##              Copyright (C) 2007  Carlo de Falco
+  ##              Copyright (C) 2007  Culpo Massimiliano
   ## 
   ##   MSH is free software; you can redistribute it and/or modify
   ##   it under the terms of the GNU General Public License as published by
