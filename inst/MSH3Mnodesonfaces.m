@@ -32,44 +32,50 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{nodelist}]} =@
-## MSH2Mnodesonsides(@var{mesh}, @var{sidelist})
+## MSH3Mnodesonfaces(@var{mesh}, @var{facelist})
 ##
-## Returns a list of the nodes lying on the sides @var{sidelist} of
+## Returns a list of the nodes lying on the faces @var{facelist} of
 ## the mesh @var{mesh}.
 ##
 ## Input:
 ## @itemize @minus
 ## @item @var{mesh}: standard PDEtool-like mesh, with field "p", "e", "t".
-## @item @var{sidelist}: row vector containing the number of the sides (numbering referred to mesh.e(5,:)).
+## @item @var{facelist}: row vector containing the number of the faces (numbering referred to mesh.e(10,:)).
 ## @end itemize
 ##
 ## Output:
 ## @itemize @minus
-## @item @var{nodelist}: list of the nodes that lies on the specified sides.
+## @item @var{nodelist}: list of the nodes that lies on the specified faces.
 ## @end itemize 
 ##
-## @seealso{MSH2Mgeomprop,MSH2Mtopprop}
+## @seealso{MSH3Mgeomprop,MSH3Mtopprop}
 ## @end deftypefn
 
-function [nodelist] = MSH2Mnodesonsides(mesh,sidelist)
+function [nodelist] = MSH3Mnodesonfaces(mesh,facelist);
 
-  edgelist    =[];
+  facefaces = [];
   
-  for ii = 1:length(sidelist)
-    edgelist=[edgelist,find(mesh.e(5,:)==sidelist(ii))];
+  for ii=1:length(facelist)
+    facefaces = [facefaces,find(mesh.e(10,:)==facelist(ii))];
   endfor
 
-  ##Set list of nodes with Dirichelet BCs
-  nodelist = mesh.e(1:2,edgelist);
-  nodelist = [nodelist(1,:) nodelist(2,:)];
-  nodelist = unique(nodelist);
-
+  facenodes = mesh.e(1:3,facefaces);
+  nodelist  = unique(facenodes(:));
+  
 endfunction
 
+%!shared x,y,z,mesh
+% x = y = z = linspace(0,1,2);
+% [mesh] = MSH3Mstructmesh(x,y,z,1,1:6);
 %!test
-%! [mesh1] = MSH2Mstructmesh(0:.5:1, 0:.5:1, 1, 1:4, 'left');
-%! [mesh2] = MSH2Mstructmesh(1:.5:2, 0:.5:1, 1, 1:4, 'left');
-%! [mesh] = MSH2Mjoinstructm(mesh1,mesh2,2,4);
-%! [nodelist] = MSH2Mnodesonsides(mesh,[1 2]);
-%! reallist = [1   4   7   8   9];
-%! assert(nodelist,reallist);
+% nodelist = MSH3Mnodesonfaces(mesh,1);
+% assert(nodelist,[1 2 5 6]')
+%!test
+% nodelist = MSH3Mnodesonfaces(mesh,2);
+% assert(nodelist,[3 4 7 8]')
+%!test
+% nodelist = MSH3Mnodesonfaces(mesh,3);
+% assert(nodelist,[1 3 5 7]')
+%!test
+% nodelist = MSH3Mnodesonfaces(mesh,[1 2 3]);
+% assert(nodelist,[1:8]')

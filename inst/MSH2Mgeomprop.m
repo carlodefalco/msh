@@ -1,78 +1,77 @@
+## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+##
+## This file is part of 
+##
+##                   MSH - Meshing Software Package for Octave
+## 
+##  MSH is free software; you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation; either version 2 of the License, or
+##  (at your option) any later version.
+## 
+##  MSH is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License for more details.
+## 
+##  You should have received a copy of the GNU General Public License
+##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
+##
+##
+##  AUTHORS:
+##  Carlo de Falco
+##  Dublin City University
+##  School of Mathemetical Sciences
+##  Ireland
+##
+##  Culpo Massimiliano
+##  Bergische Universitaet Wuppertal
+##  Fachbereich C - Mathematik und Naturwissenschaften
+##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
+##  D-42119 Wuppertal, Germany
+
+## -*- texinfo -*-
+## @deftypefn {Function File} {[@var{varargout}]} = MSH2Mgeomprop(@var{mesh},[@var{string1},@var{string2},...])
+##
+## Computes geometrical properties of the specified mesh
+##
+## Input:
+## @itemize @minus
+## @item @var{mesh}: standard PDEtool-like mesh, with field "p", "e", "t".
+## @item @var{string1}, @var{string2},...: identifier of the property to compute. Possible choices are listed below.
+## @itemize @bullet
+## @item "bar" (center of mass): return a matrix with size 2 times number of elements containing the coordinates of the center of mass of every trg.
+## @item "cir" (circumcenter):  return a matrix with size 2 times number of elements containing the coordinates of the circumcenter of every trg.
+## @item "emidp" (boundary edges midpoint): return a matrix with size 2 times number of b.edges containing the coordinates of the midpoint.
+## @item "slength" (length of the sides): return a matrix with size 3 times number of elements containing the length of the sides.
+## @item "cdist" (distance among circumcenters of neighbouring elements): return a matrix with size 3 times number of elements containing the
+##               distance among circumcenters of neighbouring elements. If the corresponding side lies on the edge, the distance between 
+##               circumcenter and border edge is returned in the matrix.
+## @item "wjacdet" : 
+## @item "shg": gradient of the P1 shape functions for BIM method
+## @item "area" (trg area): return a row vector, with length equal to number of elements, containing the area of every trg in the mesh.
+## @item "midedge" (midpoint coordinates of every edge): return a matrix with size 2(x and y coordinates) times 3(edge number) times n of elements
+##                  containing the coordinates of the midpoint of every trg edge.
+## @end itemize
+## @end itemize 
+##
+## The output will contain the geometrical properties requested in the input in the same order specified in the function call
+## @seealso{MSH2Mtopprop}
+## @end deftypefn
+
 function [varargout] = MSH2Mgeomprop(mesh,varargin)
 
-  ## -*- texinfo -*-
-  ## @deftypefn {Function File} {[@var{varargout}]} = MSH2Mgeomprop(@var{mesh},[@var{string1},@var{string2},...])
-  ##
-  ## Computes geometrical properties of the specified mesh
-  ##
-  ## Input:
-  ## @itemize @minus
-  ## @item @var{mesh}: standard PDEtool-like mesh, with field "p", "e", "t".
-  ## @item @var{string1}, @var{string2},...: identifier of the property to compute. Possible choices are listed below.
-  ## @itemize @bullet
-  ## @item "bar" (center of mass): return a matrix with size 2 times number of elements containing the coordinates of the center of mass of every trg.
-  ## @item "cir" (circumcenter):  return a matrix with size 2 times number of elements containing the coordinates of the circumcenter of every trg.
-  ## @item "emidp" (boundary edges midpoint): return a matrix with size 2 times number of b.edges containing the coordinates of the midpoint.
-  ## @item "slength" (length of the sides): return a matrix with size 3 times number of elements containing the length of the sides.
-  ## @item "cdist" (distance among circumcenters of neighbouring elements): return a matrix with size 3 times number of elements containing the
-  ##               distance among circumcenters of neighbouring elements. If the corresponding side lies on the edge, the distance between 
-  ##               circumcenter and border edge is returned in the matrix.
-  ## @item "wjacdet" : 
-  ## @item "shg": gradient of the P1 shape functions for BIM method
-  ## @item "area" (trg area): return a row vector, with length equal to number of elements, containing the area of every trg in the mesh.
-  ## @item "midedge" (midpoint coordinates of every edge): return a matrix with size 2(x and y coordinates) times 3(edge number) times n of elements
-  ##                  containing the coordinates of the midpoint of every trg edge.
-  ## @end itemize
-  ## @end itemize 
-  ##
-  ## The output will contain the geometrical properties requested in the input in the same order specified in the function call
-  ## @seealso{MSH2Mtopprop}
-  ## @end deftypefn
-
-  ## This file is part of 
-  ##
-  ##                   MSH - Meshing Software Package for Octave
-  ##      -------------------------------------------------------------------
-  ##              Copyright (C) 2007  Carlo de Falco
-  ##              Copyright (C) 2007  Culpo Massimiliano
-  ## 
-  ##   MSH is free software; you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation; either version 2 of the License, or
-  ##   (at your option) any later version.
-  ## 
-  ##   MSH is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
-  ## 
-  ##   You should have received a copy of the GNU General Public License
-  ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
-  ##
-  ##
-  ##   AUTHORS:
-  ##   Carlo de Falco
-  ##   Dublin City University
-  ##   School of Mathemetical Sciences
-  ##   Ireland
-  ##
-  ##   Culpo Massimiliano
-  ##   Bergische Universitaet Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-  ##   D-42119 Wuppertal, Germany
-
-
   p = mesh.p; e = mesh.e; t = mesh.t;
-  ##Number of elements in the mesh
+  ## Number of elements in the mesh
   nelem = columns(t);
 
-  ##Check if varargin is composed of strings as expected
+  ## Check if varargin is composed of strings as expected
   if iscellstr(varargin) == 0
-    error("Unexpected input. See help for more information.")
+    warning("Unexpected input. See help for more information.");
+    print_usage;
   endif
 
-  ##Edges coefficients
+  ## Edges coefficients
   [k,j,w] = coeflines(p,t,nelem);
 
   for nn = 1:length(varargin)
@@ -344,16 +343,16 @@ function [b] = computearea(p,e,t,string)
     jac([3,4],degen) = [p(2,t(2,degen))-p(2,t(1,degen));
 		      p(2,t(3,degen))-p(2,t(1,degen))];
     jacdet(degen) = jac(1,degen).*jac(4,degen)-jac(2,degen).*jac(3,degen);
-  end
+  endif
 
   for inode = 1:3
     wjacdet(inode,:) = areakk .* jacdet .* weight(inode);
-  end
+  endfor
 
-	if string == 'wjac'
-		b = wjacdet();
-	elseif string == 'area'
-  	b = sum(wjacdet)';
+  if string == 'wjac'
+    b = wjacdet();
+  elseif string == 'area'
+    b = sum(wjacdet)';
   endif
   
 endfunction

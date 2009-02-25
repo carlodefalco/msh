@@ -1,56 +1,52 @@
-function [msh] = MSH2Mequalizemesh(msh)
+## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+##
+## This file is part of 
+##
+##                   MSH - Meshing Software Package for Octave
+## 
+##  MSH is free software; you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation; either version 2 of the License, or
+##  (at your option) any later version.
+## 
+##  MSH is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License for more details.
+## 
+##  You should have received a copy of the GNU General Public License
+##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
+##
+##
+##  AUTHORS:
+##  Carlo de Falco
+##  Dublin City University
+##  School of Mathemetical Sciences
+##  Ireland
+##
+##  Culpo Massimiliano
+##  Bergische Universitaet Wuppertal
+##  Fachbereich C - Mathematik und Naturwissenschaften
+##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
+##  D-42119 Wuppertal, Germany
 
-
-  ## -*- texinfo -*-
-  ## @deftypefn {Function File} {[@var{Ax}, @var{Ay}, @var{bx}, @
-  ## @var{by}]} = MSH2Mequalizemesh(@var{msh})
-  ##
-  ## To equalize the size of  triangle edges, apply a baricentric@
-  ## regularization, i.e. move each node to the @
-  ## center of mass of the patch of triangles to which it belongs.
-  ##
-  ## May be useful when distorting a mesh, 
-  ## type @code{ demo MSH2Mequalizemesh } to see some examples. 
-  ##
-  ## @seealso{MSH2Mdisplacementsmoothing}
-  ##
-  ## @end deftypefn
+## -*- texinfo -*-
+## @deftypefn {Function File} {[@var{Ax}, @var{Ay}, @var{bx}, @
+## @var{by}]} = MSH2Mequalizemesh(@var{msh})
+##
+## To equalize the size of  triangle edges, apply a baricentric@
+## regularization, i.e. move each node to the @
+## center of mass of the patch of triangles to which it belongs.
+##
+## May be useful when distorting a mesh, 
+## type @code{ demo MSH2Mequalizemesh } to see some examples. 
+##
+## @seealso{MSH2Mdisplacementsmoothing}
+##
+## @end deftypefn
   
-  ## This file is part of 
-  ##
-  ##                   MSH - Meshing Software Package for Octave
-  ##      -------------------------------------------------------------------
-  ##              Copyright (C) 2007  Carlo de Falco
-  ##              Copyright (C) 2007  Culpo Massimiliano
-  ## 
-  ##   MSH is free software; you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation; either version 2 of the License, or
-  ##   (at your option) any later version.
-  ## 
-  ##   MSH is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
-  ## 
-  ##   You should have received a copy of the GNU General Public License
-  ##   along with MSH; if not, write to the Free Software
-  ##   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
-  ##   USA
-  ##
-  ##
-  ##   AUTHORS:
-  ##   Carlo de Falco
-  ##   Dublin City University
-  ##   School of Mathemetical Sciences
-  ##   Ireland
-  ##
-  ##   Culpo Massimiliano
-  ##   Bergische Universitaet Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-  ##   D-42119 Wuppertal, Germany
-
+function [msh] = MSH2Mequalizemesh(msh)
+  
   nel= columns(msh.t);
 
   x  = msh.p(1,:)';
@@ -70,8 +66,8 @@ function [msh] = MSH2Mequalizemesh(msh)
     for jnode=1:3
       ginode(inode,jnode,:)=msh.t(inode,:);
       gjnode(inode,jnode,:)=msh.t(jnode,:);
-    end
-  end
+    endfor
+  endfor
 
   for ii=1:3  
     
@@ -95,6 +91,8 @@ function [msh] = MSH2Mequalizemesh(msh)
   y(varnodes) = Ay(varnodes,varnodes) \ (-Ay(varnodes,dnodes)*y(dnodes));
   msh.p(1,:) = x';
   msh.p(2,:) = y';
+
+endfunction
 
 %!demo
 %! ### equalize a structured mesh without moving boundary nodes

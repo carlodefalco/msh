@@ -1,58 +1,54 @@
-function [msh] = MSH2Mjigglemesh(msh, steps)
+## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+##
+## This file is part of 
+##
+##                   MSH - Meshing Software Package for Octave
+## 
+##  MSH is free software; you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation; either version 2 of the License, or
+##  (at your option) any later version.
+## 
+##  MSH is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License for more details.
+## 
+##  You should have received a copy of the GNU General Public License
+##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
+##
+##
+##  AUTHORS:
+##  Carlo de Falco
+##  Dublin City University
+##  School of Mathemetical Sciences
+##  Ireland
+##
+##  Culpo Massimiliano
+##  Bergische Universitaet Wuppertal
+##  Fachbereich C - Mathematik und Naturwissenschaften
+##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
+##  D-42119 Wuppertal, Germany
 
-
-  ## -*- texinfo -*-
-  ## @deftypefn {Function File} {[newmsh]} = MSH2Mjigglemesh(@var{msh}, @var{steps})
-  ##
-  ## To equalize the size of  triangle edges, set a spring of rest
-  ## length @var{factor}*@var{area} along each edge of the mesh and
-  ## solve for static equilibrium.
-  ##
-  ## The non-linear eqautions of the system obtained are soved via a
-  ## non-linear Gass-Seidel method. @var{step} is the number of steps of
-  ## the method to be applied.
-  ##
-  ## May be useful when distorting a mesh, type @code{demo
-  ## MSH2Mjigglemesh} to see some examples.
-  ##
-  ## @seealso{MSH2Mdisplacementsmoothing, MSH2Mequalizemesh}
-  ##
-  ## @end deftypefn
+## -*- texinfo -*-
+## @deftypefn {Function File} {[newmsh]} = MSH2Mjigglemesh(@var{msh}, @var{steps})
+##
+## To equalize the size of  triangle edges, set a spring of rest
+## length @var{factor}*@var{area} along each edge of the mesh and
+## solve for static equilibrium.
+##
+## The non-linear eqautions of the system obtained are soved via a
+## non-linear Gass-Seidel method. @var{step} is the number of steps of
+## the method to be applied.
+##
+## May be useful when distorting a mesh, type @code{demo
+## MSH2Mjigglemesh} to see some examples.
+##
+## @seealso{MSH2Mdisplacementsmoothing, MSH2Mequalizemesh}
+##
+## @end deftypefn
   
-  ## This file is part of 
-  ##
-  ##                   MSH - Meshing Software Package for Octave
-  ##      -------------------------------------------------------------------
-  ##              Copyright (C) 2007  Carlo de Falco
-  ##              Copyright (C) 2007  Culpo Massimiliano
-  ## 
-  ##   MSH is free software; you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation; either version 2 of the License, or
-  ##   (at your option) any later version.
-  ## 
-  ##   MSH is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
-  ## 
-  ##   You should have received a copy of the GNU General Public License
-  ##   along with MSH; if not, write to the Free Software
-  ##   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
-  ##   USA
-  ##
-  ##
-  ##   AUTHORS:
-  ##   Carlo de Falco
-  ##   Dublin City University
-  ##   School of Mathemetical Sciences
-  ##   Ireland
-  ##
-  ##   Culpo Massimiliano
-  ##   Bergische Universitaet Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-  ##   D-42119 Wuppertal, Germany
+function [msh] = MSH2Mjigglemesh(msh, steps)
 
   nel= columns(msh.t);
   nnodes = columns(msh.p);
@@ -63,8 +59,8 @@ function [msh] = MSH2Mjigglemesh(msh, steps)
   dnodes = unique(msh.e(1:2,:)(:));
   vnodes = setdiff(1:nnodes,dnodes);
 
-  %% find node neighbours XXX FIXME: should this go
-  %% into MSH2Mtopprop ?
+  ## find node neighbours XXX FIXME: should this go
+  ## into MSH2Mtopprop ?
   sides = MSH2Mtopprop(msh,'sides');
   for inode = 1:nnodes
     neig{inode} = (sides(:, sides(1,:) == inode | sides(2,:) == inode))(:);
@@ -86,6 +82,8 @@ function [msh] = MSH2Mjigglemesh(msh, steps)
   endfor
   
   msh.p = [x';y'];
+
+endfunction
   
 %!demo
 %! ### distort a mesh on a square equalizing at each step

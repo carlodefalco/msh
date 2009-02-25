@@ -1,87 +1,86 @@
+## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+##
+## This file is part of 
+##
+##                   MSH - Meshing Software Package for Octave
+## 
+##  MSH is free software; you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation; either version 2 of the License, or
+##  (at your option) any later version.
+## 
+##  MSH is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License for more details.
+## 
+##  You should have received a copy of the GNU General Public License
+##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
+##
+##
+##  AUTHORS:
+##  Carlo de Falco
+##  Dublin City University
+##  School of Mathemetical Sciences
+##  Ireland
+##
+##  Culpo Massimiliano
+##  Bergische Universitaet Wuppertal
+##  Fachbereich C - Mathematik und Naturwissenschaften
+##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
+##  D-42119 Wuppertal, Germany
+
+## -*- texinfo -*-
+## @deftypefn {Function File} {[@var{varargout}]} = MSH2Mtopprop(@var{mesh}, [@var{string1}, @var{string2},...])
+##
+## Computes some topological properties of the mesh @var{mesh}.
+##
+## Input:
+## @itemize @minus
+## @item @var{mesh}: mesh structure with (at least) fields @code{p},
+## @code{e} and @code{t} a detailed in the help for @code{MSH2Mstructmesh}.
+## @item @var{string1}, @var{string2},...: properties to compute,
+## available choices are:
+##
+## @itemize @bullet
+## @item "n" (neighbouring triangles): a matrix @code{M} of size 3 by
+##  the number of elements. Element @code{M(i,j)} will be the index of
+##  the mesh element sharing with elemnt number @code{j} its
+## @code{i}-th edge if no such element exists (i.e. for boundary
+##  edges) a value of @code{NaN} is set.
+## @item "sides" (global edge matrix): a matrix @code{M} of size 2 by
+##  total number of edges. Element @code{M(i,j)} will be the index of
+##  the vertex at the @code{i}-th end of the @code{j}-th edge. 
+## @item "ts" (triangle sides matrix): a matrix @code{M} of size 3 by
+##  number of elements. Element @code{M(i,j)} will be the index of the
+##  @code{i}-th side of the @code{j}-th mesh element.
+##  @item "tws" (trg with sides matrix):a matrix @code{M} of size 2 by
+##  the total number of edges.
+##  @code{M(:,j)} will the set of indeces of the mesh
+##  elements to whose boundary the @code{j}-th mesh edge belongs.
+##  For an edge @code{j} belonging to one triangle onlly (an external
+##  boundary edge)  @code{M(2,j) = NaN}.
+## @item "coinc" (coincident circumcenter matrix): a matrix @code{M}
+##  with 2 rows.
+##  Each column will contain the indices of two triangles sharing the
+##  same circumcenter.
+## @item "boundary" (boundary edge matrix): a matrix @code{M} of size 2
+##  times the total number of boundary edges.
+##  @code{M(1,:)} will be the set of mesh elements (possibly repeated)
+##  with at least one edge belonging to the external boundary.
+##  @code{0 < M(2,j) < 4} will be the (local) index of an edge of the
+##  @code{j}-th mesh element that lies on the external boundary.   
+## @end itemize
+## @end itemize 
+##
+## The output will contain the geometrical properties requested in the input in the same order specified in the function call
+## @seealso{MSHM2geomprop}
+## @end deftypefn
+
 function [varargout] = MSH2Mtopprop(mesh,varargin)
 
-  ## -*- texinfo -*-
-  ## @deftypefn {Function File} {[@var{varargout}]} = MSH2Mtopprop(@var{mesh}, [@var{string1}, @var{string2},...])
-  ##
-  ## Computes some topological properties of the mesh @var{mesh}.
-  ##
-  ## Input:
-  ## @itemize @minus
-  ## @item @var{mesh}: mesh structure with (at least) fields @code{p},
-  ## @code{e} and @code{t} a detailed in the help for @code{MSH2Mstructmesh}.
-  ## @item @var{string1}, @var{string2},...: properties to compute,
-  ## available choices are:
-  ##
-  ## @itemize @bullet
-  ## @item "n" (neighbouring triangles): a matrix @code{M} of size 3 by
-  ##  the number of elements. Element @code{M(i,j)} will be the index of
-  ##  the mesh element sharing with elemnt number @code{j} its
-  ## @code{i}-th edge if no such element exists (i.e. for boundary
-  ##  edges) a value of @code{NaN} is set.
-  ## @item "sides" (global edge matrix): a matrix @code{M} of size 2 by
-  ##  total number of edges. Element @code{M(i,j)} will be the index of
-  ##  the vertex at the @code{i}-th end of the @code{j}-th edge. 
-  ## @item "ts" (triangle sides matrix): a matrix @code{M} of size 3 by
-  ##  number of elements. Element @code{M(i,j)} will be the index of the
-  ##  @code{i}-th side of the @code{j}-th mesh element.
-  ##  @item "tws" (trg with sides matrix):a matrix @code{M} of size 2 by
-  ##  the total number of edges.
-  ##  @code{M(:,j)} will the set of indeces of the mesh
-  ##  elements to whose boundary the @code{j}-th mesh edge belongs.
-  ##  For an edge @code{j} belonging to one triangle onlly (an external
-  ##  boundary edge)  @code{M(2,j) = NaN}.
-  ## @item "coinc" (coincident circumcenter matrix): a matrix @code{M}
-  ##  with 2 rows.
-  ##  Each column will contain the indices of two triangles sharing the
-  ##  same circumcenter.
-  ## @item "boundary" (boundary edge matrix): a matrix @code{M} of size 2
-  ##  times the total number of boundary edges.
-  ##  @code{M(1,:)} will be the set of mesh elements (possibly repeated)
-  ##  with at least one edge belonging to the external boundary.
-  ##  @code{0 < M(2,j) < 4} will be the (local) index of an edge of the
-  ##  @code{j}-th mesh element that lies on the external boundary.   
-  ## @end itemize
-  ## @end itemize 
-  ##
-  ## The output will contain the geometrical properties requested in the input in the same order specified in the function call
-  ## @seealso{MSHM2geomprop}
-  ## @end deftypefn
-
-  ## This file is part of 
-  ##
-  ##                   MSH - Meshing Software Package for Octave
-  ##      -------------------------------------------------------------------
-  ##              Copyright (C) 2007  Carlo de Falco
-  ##              Copyright (C) 2007  Culpo Massimiliano
-  ## 
-  ##   MSH is free software; you can redistribute it and/or modify
-  ##   it under the terms of the GNU General Public License as published by
-  ##   the Free Software Foundation; either version 2 of the License, or
-  ##   (at your option) any later version.
-  ## 
-  ##   MSH is distributed in the hope that it will be useful,
-  ##   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ##   GNU General Public License for more details.
-  ## 
-  ##   You should have received a copy of the GNU General Public License
-  ##   along with MSH; If not, see <http://www.gnu.org/licenses/>.
-  ##
-  ##
-  ##   AUTHORS:
-  ##   Carlo de Falco
-  ##   Dublin City University
-  ##   School of Mathemetical Sciences
-  ##   Ireland
-  ##
-  ##   Culpo Massimiliano
-  ##   Bergische Universitaet Wuppertal
-  ##   Fachbereich C - Mathematik und Naturwissenschaften
-  ##   Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-  ##   D-42119 Wuppertal, Germany
-
   p = mesh.p; e = mesh.e; t = mesh.t;
-  ##Number of elements in the mesh
+  ## Number of elements in the mesh
   nelem = columns(t);
   [n,ts,tws,sides] = neigh(t,nelem);
 
@@ -167,9 +166,9 @@ function [n,ts,triwside,sides] = neigh(t,nelem)
 
   triwside = zeros(2,columns(sides));
   for kk =1:3
-  triwside(1,ts(kk,1:end)) = 1:nelem;
-  triwside(2,ts(4-kk,end:-1:1)) = nelem:-1:1;
-  end
+    triwside(1,ts(kk,1:end)) = 1:nelem;
+    triwside(2,ts(4-kk,end:-1:1)) = nelem:-1:1;
+  endfor
 
   triwside(2,triwside(1,:)==triwside(2,:)) = NaN;
 
@@ -231,17 +230,17 @@ function [output] = borderline(e,t)
       output(2*numtrg+1,ii) = jj1(jj);
       output(2*numtrg+2,ii) = 1;
       numtrg += 1;
-    end
+    endfor
     for jj=1:length(jj2)
       output(2*numtrg+1,ii) = jj2(jj);
       output(2*numtrg+2,ii) = 2;
       numtrg += 1;
-    end
+    endfor
     for jj=1:length(jj3)
       output(2*numtrg+1,ii) = jj3(jj);
       output(2*numtrg+2,ii) = 3;
       numtrg += 1;
-    end
+    endfor
 
   endfor
 endfunction
