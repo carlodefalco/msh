@@ -19,10 +19,7 @@
 ##
 ##
 ##  AUTHORS:
-##  Carlo de Falco
-##  Dublin City University
-##  School of Mathemetical Sciences
-##  Ireland
+##  Carlo de Falco <cdf _AT_ users.sourceforge.net>
 ##
 ##  Culpo Massimiliano
 ##  Bergische Universitaet Wuppertal
