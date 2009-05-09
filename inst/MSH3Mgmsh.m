@@ -88,7 +88,7 @@ function [mesh] = MSH3Mgmsh(geometry,varargin)
     if !ischar(value)
       value = num2str(value);
     endif
-    optstring = strcat(optstring," -",option," ",value);
+    optstring = [optstring," -",option," ",value];
   endfor
 
   ## Generate mesh using Gmsh
@@ -98,18 +98,18 @@ function [mesh] = MSH3Mgmsh(geometry,varargin)
 
   printf("Processing gmsh data...\n");
   ## Points
-  com_p   = strcat("awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3, $4 > ""msh_p.txt""}' ");
+  com_p   = "awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3, $4 > ""msh_p.txt""}' ";
   ## Surface edges
-  com_e   = strcat("awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""2"") print $7, $8, $9, $5 > ""msh_e.txt""}' ");
+  com_e   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""2"") print $7, $8, $9, $5 > ""msh_e.txt""}' ";
   ## Tetrahedra
-  com_t   = strcat("awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""4"") print $7, $8, $9, $10, $5 > ""msh_t.txt""}' ");
+  com_t   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""4"") print $7, $8, $9, $10, $5 > ""msh_t.txt""}' ";
   ## Side edges
-  com_s   = strcat("awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""1"") print $7, $8, $5 > ""msh_s.txt""}' ");
+  com_s   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""1"") print $7, $8, $5 > ""msh_s.txt""}' ";
 
-  command = strcat(com_p,geometry,".msh ; ");
-  command = strcat(command,com_e,geometry,".msh ; ");
-  command = strcat(command,com_t,geometry,".msh ; ");
-  command = strcat(command,com_s,geometry,".msh");
+  command = [com_p,geometry,".msh ; "];
+  command = [command,com_e,geometry,".msh ; "];
+  command = [command,com_t,geometry,".msh ; "];
+  command = [command,com_s,geometry,".msh"];
   
   system(command);
 

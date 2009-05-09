@@ -1,4 +1,4 @@
-## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+## Copyright (C) 2007,2009  Carlo de Falco, Massimiliano Culpo
 ##
 ## This file is part of 
 ##
@@ -28,127 +28,125 @@
 ##  D-42119 Wuppertal, Germany
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{mesh}]} = MSH2Mgmsh(@var{geometry},@var{scalefactor},@var{refine})
+## @deftypefn {Function File} {[@var{mesh}]} = msh2m_gmsh(@var{geometry},@var{option},@var{value},...)
 ##
-## Constructs an unstructured 2D mesh making use of the free software gmsh. Gives as output the PDE-tool like mesh structure.
+## Construct an unstructured triangular 2D mesh making use of the free
+## software gmsh. Return a PDE-tool like mesh structure.
 ##
 ## Input:
 ## @itemize @minus
-## @item @var{geometry}: name of the ".geo" file describing the 2D geometry. Required by gmsh to start the meshing operation.
-## @item @var{scalefactor}: every length in the geometry file will be multiplied by this number. If the geometry is allready scaled, set it to 1.
-## @item @var{refine}: gmsh clscale factor. The smaller this number, the bigger the number of elements in the mesh.
+## @item @var{geometry}: basename of the ".geo" file to be meshed.
+## @item @var{option}: string of the option to pass gmsh.
+## @item @var{value}: value of the option to pass gmsh.
 ## @end itemize
-## For more information refer to gmsh manual, or gmsh site:
-## 
+##
+## For more information regarding the possible option to pass, refer to gmsh manual or gmsh site:
 ## http://www.geuz.org/gmsh/
 ##
-## Output: mesh basic structure, composed of the following fields
+## @var{mesh} structure is composed of the following fields:
+##
 ## @itemize @minus
-## @item @var{p}: matrix with size 2 times number of mesh point. 
-## @itemize @bullet
-## @item 1st row: x-coordinates of the points.
-## @item 2nd row: y-coordinates of the points.
-## @end itemize
-## @item @var{e}: matrix with size 7 times number of mesh border edges.
-## @itemize @bullet
-## @item 1st row: p-matrix column number of the first edge-vertex.
-## @item 2nd row: p-matrix column number of the second edge-vertex.
-## @item 3rd row: not initialized, only for compatibility with standard PDE-tool like mesh.
-## @item 4th row: not initialized, only for compatibility with standard PDE-tool like mesh.
-## @item 5th row: number of the geometrical border upon which the referred mesh edge is lying on.
-## @item 6th row: number of the region to the right of the referred mesh edge.
-## @item 7th row: number of the region to the left of the referred mesh edge.
-## @end itemize
-## @item @var{t}:
-## @itemize @bullet
-## @item 1st row: p-matrix column number of the first trg-vertex.
-## @item 2nd row: p-matrix column number of the second trg-vertex.
-## @item 3rd row: p-matrix column number of the third trg-vertex.
-## @item 4th row: number of the region upon which the referred trg is lying on.
-## @end itemize
+## @item @var{p}: 2 X (# nodes) matrix. Contain mesh points coordinates. 
+## @item @var{e}: 7 X (# side edges) matrix. Contain mesh side
+## edges information.
+## @item @var{t}: 4 X (# triangles) matrix. Contain pointer to @var{p}
+## field, as well as region number.
 ## @end itemize 
 ##
-## @seealso{MSH2Mstructmesh,MSH2Mjoinstructm,MSH2Msubmesh}
+## @seealso{msh2m_structured_mesh, msh2m_join_structured_mesh, msh2m_submesh}
 ## @end deftypefn
 
-function [mesh] = MSH2Mgmsh(geometry,scalefactor,refine)
+function [mesh] = MSH2Mgmsh(geometry,varargin)
 
-  if nargin==2
-    refine =1;
+  ## 1. Check input
+  ## 1a. Number of input
+  if !mod(nargin,2)
+    warning("WRONG NUMBER OF INPUT.");
+    print_usage;
   endif
 
-  system(["gmsh -v 0 -format msh1 -2 -scale " num2str(scalefactor) " -clscale ",...
-	num2str(refine) " " geometry ".geo"]);
-
-  mesh = msh2pdetool(geometry);
-
-endfunction
-
-
-function msh=msh2pdetool(filename);
-  ##CONVERTS THE MESH FROM GMSH FORMAT TO  PDETOOL-LIKE ONE
-
-awk_command =...
- "BEGIN {  filename = ARGV[1] ; gsub(/\\./,""_"",filename) }\n\
-\n\
-/\\$NOD/,/\\$ENDNOD/ { \n\
-    if ( FNR>2 ) \n\
-    {  \n\
-	if($0 ~ /^[^\\$]/  )  \n\
-	{\n\
-	    print "" "" $1 "" "" $2 "" ""  $3   > filename ""_p.m"" \n\
-	}\n\
-    } \n\
-} \n\
-\n\
-/\\$ELM/,/\\$ENDNELM/ { \n\
-    if (  $1 ~ /\\$ELM/   )\n\
-    {\n\
-    } else if  ($1 ~ /\\$ENDELM/ ){\n\
-    }\n\
-    else if ( $2 == ""2"" )\n\
-    {\n\
-	print ( $6 "" "" $7 "" "" $8 "" "" $4)  > filename ""_t.m"" \n\
-    }\n\
-    else if ( $2 == ""1"" )\n\
-    {\n\
-	print ( $6 "" "" $7 "" 0 0 "" $4 "" 0 0"")  > filename ""_e.m"" \n\
-    }\n\
-    else if ( $2 == ""9"" )\n\
-    {\n\
-     print ( $6 "" "" $7 "" "" $8 "" "" $9 "" "" $10 "" "" $11 "" "" $4)  > filename ""_t.m"" \n\
-    }\n\
-    else if ( $2 == ""8"" )\n\
-    {\n\
-     print ( $6 "" "" $7 "" "" $8 "" 0 "" $4)  > filename ""_e.m"" \n\
-    }\n\
-}\n\
-\n\
-{ }";
-
-  system(["awk '" awk_command "' " filename ".msh"]); 
-
-  p = load([ filename "_msh_p.m"]);
-  p = p(p(:,1),2:3);
-  e = load([ filename "_msh_e.m"]);
-  t = load([ filename "_msh_t.m"]);
+  ## 2. Build mesh
+  noptions  = (nargin - 1) / 2; # Number of passed options
   
-  p = p.';
-  t = t.';
-  e = e.';
+  ## 2a. Construct system command string
+  optstring = "";
+  for ii = 1:noptions
+    option    = varargin{2*(ii)-1};
+    value     = varargin{2*ii};
+    if !ischar(value)
+      value = num2str(value);
+    endif
+    optstring = [optstring," -",option," ",value];
+  endfor
 
-  ## remove "hanging" nodes
-  in_msh          = intersect( 1:columns(p) , t(1:3,:) );
-  new_num(in_msh) = [1:length(in_msh)];
-  t(1:3,:)        = new_num(t(1:3,:));
-  e(1:2,:)        = new_num(e(1:2,:));
-  p               = p(:,in_msh);
+  ## 2b. Invoke gmsh
+  printf("\n");
+  printf("Generating mesh...\n");
+  system(["gmsh -format msh -2 -o " geometry ".msh" optstring " " geometry ".geo"]);
 
-  ## set region numbers in edge structure
-  msh         = struct("p",p,"t",t,"e",e);
+  ## 2c. Build structure fields
+  printf("Processing gmsh data...\n");
+  ## Points
+  com_p   = "awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3 > ""msh_p.txt""}' ";
+  ## Side edges
+  com_e   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""1"") print $7, $8,$5 > ""msh_e.txt""}' ";
+  ## Triangles
+  com_t   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""2"") print $7, $8, $9, $5 > ""msh_t.txt""}' ";
+
+  command = [com_p,geometry,".msh ; "];
+  command = [command,com_e,geometry,".msh ; "];
+  command = [command,com_t,geometry,".msh"];
+  
+  system(command);
+
+  ## 2d. Create PDE-tool like structure
+  printf("Creating PDE-tool like mesh...\n");
+  p   = load("msh_p.txt")'; # Mesh-points
+  tmp = load("msh_e.txt")'; # Mesh surface-edges
+  be  = zeros(7,columns(tmp));
+  be([1,2,5],:) = tmp;
+  t   = load("msh_t.txt")'; # Mesh tetrahedra
+
+  ## 3. Remove hanging nodes
+  printf("Check for hanging nodes...\n");
+  nnodes = columns(p);
+  in_msh = intersect( 1:nnodes , t(1:3,:) );
+  if length(in_msh) != nnodes
+    new_num(in_msh) = [1:length(in_msh)];
+    t(1:3,:)        = new_num(t(1:3,:));
+    be(1:2,:)       = new_num(be(1:2,:));
+    p               = p(:,in_msh);
+  endif
+
+  ## 4. Set region numbers in edge structure
+  printf("Setting region number in edge structure...\n");
+  msh         = struct("p",p,"t",t,"e",be);
   msh.be      = MSH2Mtopprop(msh, "boundary");
   msh.e(6,:)  = msh.t(4,msh.be(1,:));
   jj          = find (sum(msh.be>0)==4);
-  msh.e(7,jj) = msh.t(4,msh.be(3,jj));
+  msh.e(7,jj) = msh.t(4,msh.be(3,jj)); 
+
+  mesh = struct("p",p,"e",be,"t",t);
+
+  ## 5. Delete temporary files
+  printf("Deleting temporary files...\n");
+  system(["rm -f msh_p.txt msh_e.txt msh_t.txt msh_s.txt *.msh"]);
 
 endfunction
+
+%!test
+%! fid = fopen("circle.geo","w");
+%! fprintf(fid,"Point(1) = {0, 0, 0, 1e+22};\n");
+%! fprintf(fid,"Point(2) = {1, 0, 0, 1e+22};\n");
+%! fprintf(fid,"Point(3) = {-1, 0, 0, 1e+22};\n");
+%! fprintf(fid,"Circle(1) = {3, 1, 2};\n");
+%! fprintf(fid,"Circle(2) = {2, 1, 3};\n");
+%! fprintf(fid,"Line Loop(4) = {2, 1};\n");
+%! fprintf(fid,"Plane Surface(4) = {4};");
+%! fclose(fid);
+%! mesh = msh2m_gmsh("circle","v",0);
+%! system("rm circle.geo");
+%! xidx = find(mesh.p(1,:) == 0);
+%! yidx = find(mesh.p(2,:) == 0);
+%! tmp  = intersect(xidx,yidx);
+%! assert(isempty(tmp));
