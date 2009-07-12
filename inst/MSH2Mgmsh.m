@@ -28,7 +28,7 @@
 ##  D-42119 Wuppertal, Germany
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{mesh}]} = msh2m_gmsh(@var{geometry},@var{option},@var{value},...)
+## @deftypefn {Function File} {[@var{mesh}]} = MSH2Mgmsh(@var{geometry},@var{option},@var{value},...)
 ##
 ## Construct an unstructured triangular 2D mesh making use of the free
 ## software gmsh. Return a PDE-tool like mesh structure.
@@ -53,7 +53,7 @@
 ## field, as well as region number.
 ## @end itemize 
 ##
-## @seealso{msh2m_structured_mesh, msh2m_join_structured_mesh, msh2m_submesh}
+## @seealso{MSH2Mstructmesh, MSH2Mjoinstructm, MSH2Msubmesh}
 ## @end deftypefn
 
 function [mesh] = MSH2Mgmsh(geometry,varargin)
