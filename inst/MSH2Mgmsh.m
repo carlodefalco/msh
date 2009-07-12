@@ -136,15 +136,15 @@ endfunction
 
 %!test
 %! fid = fopen("circle.geo","w");
-%! fprintf(fid,"Point(1) = {0, 0, 0, 1e+22};\n");
-%! fprintf(fid,"Point(2) = {1, 0, 0, 1e+22};\n");
-%! fprintf(fid,"Point(3) = {-1, 0, 0, 1e+22};\n");
+%! fprintf(fid,"Point(1) = {0, 0, 0, 1};\n");
+%! fprintf(fid,"Point(2) = {1, 0, 0, 1};\n");
+%! fprintf(fid,"Point(3) = {-1, 0, 0, 1};\n");
 %! fprintf(fid,"Circle(1) = {3, 1, 2};\n");
 %! fprintf(fid,"Circle(2) = {2, 1, 3};\n");
 %! fprintf(fid,"Line Loop(4) = {2, 1};\n");
 %! fprintf(fid,"Plane Surface(4) = {4};");
 %! fclose(fid);
-%! mesh = msh2m_gmsh("circle","v",0);
+%! mesh = MSH2Mgmsh("circle","v",0);
 %! system("rm circle.geo");
 %! xidx = find(mesh.p(1,:) == 0);
 %! yidx = find(mesh.p(2,:) == 0);
