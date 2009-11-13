@@ -146,7 +146,6 @@ endfunction
 %! fclose(fid);
 %! mesh = MSH2Mgmsh("circle","v",0);
 %! system("rm circle.geo");
-%! xidx = find(mesh.p(1,:) == 0);
-%! yidx = find(mesh.p(2,:) == 0);
-%! tmp  = intersect(xidx,yidx);
-%! assert(isempty(tmp));
+%! nnodest = length(unique(mesh.t));
+%! nnodesp = columns(mesh.p);
+%! assert(nnodest,nnodesp);
