@@ -1,68 +1,75 @@
-## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+## Copyright (C) 2006,2007,2008,2009,2010  Carlo de Falco, Massimiliano Culpo
 ##
-## This file is part of 
+## This file is part of:
+##     MSH - Meshing Software Package for Octave
 ##
-##                   MSH - Meshing Software Package for Octave
-## 
 ##  MSH is free software; you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
 ##  the Free Software Foundation; either version 2 of the License, or
 ##  (at your option) any later version.
-## 
+##
 ##  MSH is distributed in the hope that it will be useful,
 ##  but WITHOUT ANY WARRANTY; without even the implied warranty of
 ##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##  GNU General Public License for more details.
-## 
+##
 ##  You should have received a copy of the GNU General Public License
 ##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
 ##
-##
-##  AUTHORS:
-##  Carlo de Falco <cdf _AT_ users.sourceforge.net>
-##
-##  Culpo Massimiliano
-##  Bergische Universitaet Wuppertal
-##  Fachbereich C - Mathematik und Naturwissenschaften
-##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-##  D-42119 Wuppertal, Germany
+##  author: Carlo de Falco     <cdf _AT_ users.sourceforge.net>
+##  author: Massimiliano Culpo <culpo _AT_ users.sourceforge.net>
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{mesh}]} = MSH3Mjoinstructm(@var{mesh1},@var{mesh2},@var{s1},@var{s2})
+## @deftypefn {Function File} {[@var{mesh}]} = @
+## msh3m_join_structured_mesh(@var{mesh1},@var{mesh2},@var{s1},@var{s2})
 ##
-## Join two structured meshes (created by MSH3Mstructmesh) into one
-## mesh structure variable.
+## Join the two structured meshes @var{mesh1} and @var{mesh2} into one
+## single mesh. 
 ##
-## Input:
-## @itemize @minus
-## @item @var{mesh1}, @var{mesh2}: standard PDEtool-like mesh, with field "p", "e", "t".
-## @item @var{s1}, @var{s2}: number of the corresponding geometrical border edge for respectively mesh1 and mesh2.
-## @end itemize
+## The two meshes must share a common face identified by @var{s1} and
+## @var{s2}. 
 ##
-## Output:
-## @itemize @minus
-## @item @var{mesh}: standard PDEtool-like mesh, with field "p", "e", "t".
-## @end itemize 
+## @strong{WARNING}: the two meshes must share the same vertexes on the
+## common face. 
 ##
-## WARNING: on the common edge the two meshes must share the same vertexes.
-##
-## @seealso{MSH3Mstructmesh,MSH3Mgmsh,MSH3Msubmesh}
+## @seealso{msh3m_structured_mesh, msh3m_gmsh, msh3m_submesh,
+## msh2m_join_structured_mesh} 
 ## @end deftypefn
 
-function mesh = MSH3Mjoinstructm(mesh1,mesh2,s1,s2)
+function mesh = msh3m_join_structured_mesh(mesh1,mesh2,s1,s2)
 
-  ## outside world must always be on the same side of the
-  ## boundary of mesh1
+  ## Check input
+  if nargin != 4 # Number of input parameters
+    error("msh3m_join_structured_mesh: wrong number of input parameters.");
+  elseif !(isstruct(mesh1)     && isfield(mesh1,"p") && 
+	   isfield (mesh1,"e") && isfield(mesh1,"t") &&
+	   isstruct(mesh2)     && isfield(mesh2,"p") &&
+	   isfield (mesh2,"e") && isfield(mesh2,"t") )
+    error("msh3m_join_structured_mesh: invalid mesh structure passed as input.");
+  elseif !(isvector(s1) && isvector(s2))
+    error("msh3m_join_structured_mesh: shared geometrical sides are not vectors.");
+  elseif (length(s1) != length(s2))
+    error("msh3m_join_structured_mesh: vectors containing shared geometrical sides are not of the same length.");
+  endif
+  
+  ## Join meshes
+
+  ## Make sure that the outside world is always on the same side of the
+  ## boundary of mesh1 
   [mesh1.e(8:9,:),I] = sort(mesh1.e(8:9,:));
 
   ## IF THE REGIONS ARE INVERTED THE VERTEX ORDER SHOULD ALSO BE
   ## INVERTED!!
 
-  ## get interface nodes
-  intfcnodes1 = MSH3Mnodesonfaces(mesh1,s1)';
-  intfcnodes2 = MSH3Mnodesonfaces(mesh2,s2)';
+  ## FIXME: here a check could be added to see whether
+  ## the coordinate points of the two meshes coincide on the
+  ## side edges
 
-  ## sort interface nodes by position
+  ## Get interface nodes
+  intfcnodes1 = msh3m_nodes_on_faces(mesh1,s1)';
+  intfcnodes2 = msh3m_nodes_on_faces(mesh2,s2)';
+
+  ## Sort interface nodes by position
   [tmp,I]     = sort(mesh1.p(1,intfcnodes1));
   intfcnodes1 = intfcnodes1(I);
   [tmp,I]     = sort(mesh1.p(2,intfcnodes1));
@@ -77,9 +84,8 @@ function mesh = MSH3Mjoinstructm(mesh1,mesh2,s1,s2)
   [tmp,I]     = sort(mesh2.p(3,intfcnodes2));
   intfcnodes2 = intfcnodes2(I);
 
-  ## delete redundant boundary faces
-  ## but first remeber what region
-  ## they were connected to
+  ## Delete redundant boundary faces but first remeber what region they
+  ## were connected to 
   for is = 1:length(s2)
     ii           = find( mesh2.e(10,:)==s2(is) );
     adreg(is,:)  = unique(mesh2.e(9,ii)); 
@@ -89,15 +95,14 @@ function mesh = MSH3Mjoinstructm(mesh1,mesh2,s1,s2)
     mesh2.e(:,find( mesh2.e(10,:)==s2(is) )) = [];
   endfor
 
-  ## change face numbers
+  ## Change face numbers
   idx                = [];
   consecutives       = [];
   idx                = unique(mesh2.e(10,:));
   consecutives (idx) = [1:length(idx)] + max(mesh1.e(10,:));
   mesh2.e(10,:)      = consecutives(mesh2.e(10,:));
 
-  ## change node indices in connectivity matrix
-  ## and edge list
+  ## Change node indices in connectivity matrix and edge list
   idx                   = [];
   consecutives          = [];
   idx                   = 1:size(mesh2.p,2);
@@ -108,32 +113,31 @@ function mesh = MSH3Mjoinstructm(mesh1,mesh2,s1,s2)
   mesh2.e(1:3,:)             = consecutives(mesh2.e(1:3,:));
   mesh2.t(1:4,:)             = consecutives(mesh2.t(1:4,:));
 
-  ## delete redundant points
+  ## Delete redundant points
   mesh2.p(:,intfcnodes2) = [];
 
-  ## set region numbers
-  regions             = unique(mesh1.t(5,:));
+  ## Set region numbers
+  regions             = unique(mesh1.t(5,:));# Mesh 1
   newregions(regions) = 1:length(regions);
   mesh1.t(5,:)        = newregions(mesh1.t(5,:));
 
-  ## set region numbers
-  regions             = unique(mesh2.t(5,:));
+  regions             = unique(mesh2.t(5,:));# Mesh 2
   newregions(regions) = [1:length(regions)]+max(mesh1.t(5,:));
   mesh2.t(5,:)        = newregions(mesh2.t(5,:));
 
-  ## set adjacent region numbers in face structure 2
+  ## Set adjacent region numbers in face structure 2
   [i,j] = find(mesh2.e(8:9,:));
   i    += 7;
 
   mesh2.e(i,j) = newregions(mesh2.e(i,j));
 
-  ## set adjacent region numbers in edge structure 1
+  ## Set adjacent region numbers in edge structure 1
   for is = 1:length(s1)
     ii            = find( mesh1.e(10,:)==s1(is) );
     mesh1.e(8,ii) = newregions(regions(adreg(is,:)));
   endfor
 
-  ## build nbew mesh structure
+  ## Build new mesh structure
   mesh.p = [mesh1.p mesh2.p];
   mesh.e = [mesh1.e mesh2.e];
   mesh.t = [mesh1.t mesh2.t];
@@ -143,9 +147,9 @@ endfunction
 %!shared mesh1,mesh2,jmesh
 % x  = y = z = linspace(0,1,2);
 % x2 = linspace(1,2,2);
-% [mesh1] = MSH3Mstructmesh(x,y,z,1,1:6);
-% [mesh2] = MSH3Mstructmesh(x2,y,z,3,1:6);
-% [jmesh] = MSH3Mjoinstructm(mesh1,mesh2,2,1);
+% [mesh1] = msh3m_structured_mesh(x,y,z,1,1:6);
+% [mesh2] = msh3m_structured_mesh(x2,y,z,3,1:6);
+% [jmesh] = msh3m_join_structured_mesh(mesh1,mesh2,2,1);
 %!test
 % assert(columns(jmesh.p),12)
 %!test

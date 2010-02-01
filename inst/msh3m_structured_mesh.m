@@ -1,109 +1,104 @@
-## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+## Copyright (C) 2006,2007,2008,2009,2010  Carlo de Falco, Massimiliano Culpo
 ##
-## This file is part of 
+## This file is part of:
+##     MSH - Meshing Software Package for Octave
 ##
-##                   MSH - Meshing Software Package for Octave
-## 
 ##  MSH is free software; you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
 ##  the Free Software Foundation; either version 2 of the License, or
 ##  (at your option) any later version.
-## 
+##
 ##  MSH is distributed in the hope that it will be useful,
 ##  but WITHOUT ANY WARRANTY; without even the implied warranty of
 ##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##  GNU General Public License for more details.
-## 
+##
 ##  You should have received a copy of the GNU General Public License
 ##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
 ##
-##
-##  AUTHORS:
-##  Carlo de Falco <cdf _AT_ users.sourceforge.net>
-##
-##  Culpo Massimiliano
-##  Bergische Universitaet Wuppertal
-##  Fachbereich C - Mathematik und Naturwissenschaften
-##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-##  D-42119 Wuppertal, Germany
+##  author: Carlo de Falco     <cdf _AT_ users.sourceforge.net>
+##  author: Massimiliano Culpo <culpo _AT_ users.sourceforge.net>
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{mesh}]} = MSH3Mstructmesh(@var{x},@var{y},@var{z},@var{region},@var{sides})
+## @deftypefn {Function File} {[@var{mesh}]} = @
+## msh3m_structured_mesh(@var{x},@var{y},@var{z},@var{region},@var{sides})
 ##
-## Constructs a structured tetrahedral 3D mesh on a parallelepipedal domain,
-## and returns a PDEtool-like mesh structure.
+## Construct a structured tetrahedral 3D mesh on a parallelepipedal
+## domain.
 ##
-## Input:
-## @itemize @minus
-## @item @var{x}: vector representing the 1D meshing of the side
-## parallel to x axis.
-## @item @var{y}: vector representing the 1D meshing of the side
-## parallel to y axis.
-## @item @var{z}: vector representing the 1D meshing of the side
-## parallel to z axis.
-## @item @var{region}: number assigned to the meshed region.
-## @item @var{sides}: row vector containing the six numbers assigned to the geometrical surface-edges.
+## @itemize @bullet
+## @item @var{x}, @var{y} and @var{z} are the one dimensional mesh
+## vector of the corresponding Cartesian axis. 
+## @item @var{region} is a number identifying the geometrical volume,
+## while @var{sides} is a 6 components vector containing the numbers
+## used to identify the geometrical face edges. 
 ## @end itemize
 ## 
-## Output: mesh basic structure, composed of the following fields
+## The returned value @var{mesh} is a PDE-tool like mesh structure
+## composed of the following fields:
 ## @itemize @minus
-## @item @var{p}: matrix with size 3 times number of mesh point. 
+## @item @var{p}: matrix with size 3 times number of mesh points. 
 ## @itemize @bullet
 ## @item 1st row: x-coordinates of the points.
 ## @item 2nd row: y-coordinates of the points.
 ## @item 3rd row: z-coordinates of the points.
 ## @end itemize
-## @item @var{e}: matrix with size 10 times number of mesh border edges.
+## @item @var{e}: matrix with size 10 times number of mesh face edges.
 ## @itemize @bullet
-## @item 1st row: p-matrix column number of the first edge-vertex.
-## @item 2nd row: p-matrix column number of the second edge-vertex.
-## @item 3rd row: p-matrix column number of the third edge-vertex.
-## @item 4th row: not initialized, only for compatibility with standard PDE-tool like mesh.
-## @item 5th row: not initialized, only for compatibility with standard PDE-tool like mesh.
-## @item 6th row: not initialized, only for compatibility with standard PDE-tool like mesh. 
-## @item 7th row: not initialized, only for compatibility with standard PDE-tool like mesh. 
-## @item 8th row: number of the region to the right of the referred mesh
+## @item 1st row: number of the first vertex of the face edge.
+## @item 2nd row: number of the second vertex of the face edge.
+## @item 3rd row: number of the third vertex of the face edge.
+## @item 4th row: set to 0, present for compatibility with MatLab PDE-tool.
+## @item 5th row: set to 0, present for compatibility with MatLab PDE-tool.
+## @item 6th row: set to 0, present for compatibility with MatLab PDE-tool.
+## @item 7th row: set to 0, present for compatibility with MatLab PDE-tool.
+## @item 8th row: number of the geometrical volume to the right of the
+## face edge.
+## @item 9th row: number of the geometrical volume to the left of the
+## face edge.
+## @item 10th row: number of the geometrical border containing the face
 ## edge.
-## @item 9th row: number of the region to the left of the referred mesh edge.
-## @item 10th row: number of the geometrical border upon which the referred mesh edge is lying on.
 ## @end itemize
-## @item @var{t}:
+## @item @var{t}: matrix with size 5 times number of mesh elements.
 ## @itemize @bullet
-## @item 1st row: p-matrix column number of the first tetrahedra vertex.
-## @item 2nd row: p-matrix column number of the second tetrahedra vertex.
-## @item 3rd row: p-matrix column number of the third tetrahedra vertex.
-## @item 4th row: p-matrix column number of the fourth tetrahedra vertex.
-## @item 5th row: number of the region upon which the referred trg is lying on.
+## @item 1st row: number of the first vertex of the element.
+## @item 2nd row: number of the second vertex of the element.
+## @item 3rd row: number of the third vertex of the element.
+## @item 4th row: number of the fourth vertex of the element.
+## @item 5th row: number of the geometrical volume containing the element.
 ## @end itemize
 ## @end itemize 
 ##
-## @seealso{MSH2Mgmsh,MSH2Mjoinstructm,MSH2Msubmesh}
+## @seealso{msh2m_structured_mesh, msh3m_gmsh, msh2m_mesh_along_spline,
+## msh3m_join_structured_mesh, msh3m_submesh}
 ## @end deftypefn
 
-function [mesh] = MSH3Mstructmesh(x,y,z,region,sides)
+function [mesh] = msh3m_structured_mesh(x,y,z,region,sides)
 
-  ## check for correct input
-  scalar = ( isscalar(x) || isscalar(y) || isscalar(z) );
-  matrix = ( min(size(x)) + min(size(y)) + min(size(z)) != 3 );
-  if scalar
-    warning("x, y, z cannot be scalar numbers!")
-    print_usage;
-  endif
-  if matrix
-    warning("x, y, z cannot be matrices!")
-    print_usage;
+  ## Check input
+  if (nargin != 5) # Number of input parameters
+    error("msh3m_structured_mesh: wrong number of input parameters.");
+  elseif !(isvector(x) && isnumeric(x) && 
+	   isvector(y) && isnumeric(y) &&
+	   isvector(z) && isnumeric(z) )
+    error("msh3m_structured_mesh: X, Y, Z must be valid numeric vectors.");
+  elseif !isscalar(region)
+    error("msh3m_structured_mesh: REGION must be a valid scalar.");
+  elseif !(isvector(sides) && (length(sides) == 4))
+    error("msh3m_structured_mesh: SIDES must be a 4 components vector.");
   endif
 
-  ## sort point coordinates
+  ## Build mesh
+  ## Sort point coordinates
   x = sort(x);
   y = sort(y);
   z = sort(z);
-  ## compute # of points in each direction
+  ## Compute # of points in each direction
   nx = length(x);
   ny = length(y);
   nz = length(z);
 
-  ## generate verticeces
+  ## Generate vertices
   [XX,YY,ZZ] = meshgrid(x,y,z);
   p = [XX(:),YY(:),ZZ(:)]';
 
@@ -114,16 +109,14 @@ function [mesh] = MSH3Mstructmesh(x,y,z,region,sides)
   iiv(:,:,end)=[];
   iiv=iiv(:)';
 
-  ## generate connections:
+  ## Generate connections:
 
-  ## bottom faces
-  n1 = iiv;
+  n1 = iiv; # bottom faces
   n2 = iiv + 1;
   n3 = iiv + ny;
   n4 = iiv + ny + 1;
 
-  ## top faces
-  N1 = iiv + nx * ny;
+  N1 = iiv + nx * ny; # top faces
   N2 = N1  + 1;
   N3 = N1  + ny;
   N4 = N3  + 1;
@@ -137,7 +130,7 @@ function [mesh] = MSH3Mstructmesh(x,y,z,region,sides)
        [N4; n3; N2; n4],...
        ];
 
-  ## generate boundary face list:
+  ## Generate boundary face list
 
   ## left
   T       = t;
@@ -202,7 +195,7 @@ function [mesh] = MSH3Mstructmesh(x,y,z,region,sides)
   endfor
   e6(10,:) = sides(6);
 
-
+  ## Assemble structure
   mesh.e       = [e1,e2,e3,e4,e5,e6];
   mesh.t       = t;
   mesh.e (9,:) = region;
@@ -213,25 +206,25 @@ endfunction
 
 %!test
 % x = y = z = linspace(0,1,2)
-% [mesh] = MSH3Mstructmesh(x,y,z,1,1:6)
+% [mesh] = msh3m_structured_mesh(x,y,z,1,1:6)
 % assert = (columns(mesh.p),8)
 % assert = (columns(mesh.t),6)
 % assert = (columns(mesh.e),12)
 %!test
 % x = y = z = linspace(0,1,3)
-% [mesh] = MSH3Mstructmesh(x,y,z,1,1:6)
+% [mesh] = msh3m_structured_mesh(x,y,z,1,1:6)
 % assert = (columns(mesh.p),27)
 % assert = (columns(mesh.t),48)
 % assert = (columns(mesh.e),48)
 %!test
 % x = y = z = linspace(0,1,4)
-% [mesh] = MSH3Mstructmesh(x,y,z,1,1:6)
+% [mesh] = msh3m_structured_mesh(x,y,z,1,1:6)
 % assert = (columns(mesh.p),64)
 % assert = (columns(mesh.t),162)
 % assert = (columns(mesh.e),108)
 %!test
 % x = y = z = linspace(0,1,1)
-% fail([mesh] = MSH3Mstructmesh(x,y,z,1,1:6),"warning","x, y, z cannot be scalar numbers!")
+% fail([mesh] = msh3m_structured_mesh(x,y,z,1,1:6),"warning","x, y, z cannot be scalar numbers!")
 %!test
 % x = y = z = eye(2)
-% fail([mesh] = MSH3Mstructmesh(x,y,z,1,1:6),"warning","x, y, z cannot be matrices!")
+% fail([mesh] = msh3m_structured_mesh(x,y,z,1,1:6),"warning","x, y, z cannot be matrices!")

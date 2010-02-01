@@ -1,62 +1,66 @@
-## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+## Copyright (C) 2006,2007,2008,2009,2010  Carlo de Falco, Massimiliano Culpo
 ##
-## This file is part of 
+## This file is part of:
+##     MSH - Meshing Software Package for Octave
 ##
-##                   MSH - Meshing Software Package for Octave
-## 
 ##  MSH is free software; you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
 ##  the Free Software Foundation; either version 2 of the License, or
 ##  (at your option) any later version.
-## 
+##
 ##  MSH is distributed in the hope that it will be useful,
 ##  but WITHOUT ANY WARRANTY; without even the implied warranty of
 ##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##  GNU General Public License for more details.
-## 
+##
 ##  You should have received a copy of the GNU General Public License
 ##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
 ##
-##
-##  AUTHORS:
-##  Carlo de Falco <cdf _AT_ users.sourceforge.net>
-##
-##  Culpo Massimiliano
-##  Bergische Universitaet Wuppertal
-##  Fachbereich C - Mathematik und Naturwissenschaften
-##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-##  D-42119 Wuppertal, Germany
+##  author: Carlo de Falco     <cdf _AT_ users.sourceforge.net>
+##  author: Massimiliano Culpo <culpo _AT_ users.sourceforge.net>
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{varargout}]} = MSH3Mgeomprop(@var{mesh},[@var{string1},@var{string2},...])
+## @deftypefn {Function File} {[@var{varargout}]} = @
+## msh3m_geometrical_properties(@var{mesh},[@var{string1},@var{string2},...])
+## 
 ##
-## Computes geometrical properties of the specified mesh
+## Compute @var{mesh} geometrical properties identified by input strings.
 ##
-## Input:
-## @itemize @minus
-## @item @var{mesh}: standard PDEtool-like mesh, with field "p", "e", "t".
-## @item @var{string1}, @var{string2},...: identifier of the property to compute. Possible choices are listed below.
+## Valid properties are:
 ## @itemize @bullet
-## @item "wjacdet" : weighted determinant of jacobian trasformation to
-## reference tetrahedron
-## @item "shg": gradient of the P1 shape functions for BIM method
-## @item "shp": value of the P1 shape functions for BIM method
+## @item @code{"wjacdet"}: return the weigthed Jacobian determinant used
+## for the numerical integration with trapezoidal rule over an element.
+## @item @code{"shg"}: return a matrix of size 3 times the number of
+## elements matrix containing the gradient of P1 shape functions.
+## @item @code{"shp"}: return a matrix containing the the value of P1 shape
+## functions. 
 ## @end itemize
-## @end itemize 
 ##
-## The output will contain the geometrical properties requested in the input in the same order specified in the function call
+## The output will contain the geometrical properties requested in the
+## input in the same order specified in the function call.
+##
+## If an unexpected string is given as input, an empty vector is
+## returned in output.
+##
+## @seealso{msh2m_topological_properties, msh2m_geometrical_properties}
 ## @end deftypefn
 
 
-function [varargout] = MSH3Mgeomprop(imesh,varargin)
+function [varargout] = msh3m_geometrical_properties(imesh,varargin)
 
-  ## check if varargin is composed of strings as expected
-  if iscellstr(varargin) == 0
-    warning("Unexpected input. See help for more information.");
-    print_usage;
+  ## Check input
+  if nargin < 2 # Number of input parameters
+    error("msh3m_geometrical_properties: wrong number of input parameters.");
+  elseif !(isstruct(imesh)    && isfield(imesh,"p") &&
+	   isfield(imesh,"t") && isfield(imesh,"e"))
+    error("msh3m_geometrical_properties: first input is not a valid mesh structure.");
+  elseif !iscellstr(varargin)
+    error("msh3m_geometrical_properties: only string value admitted for properties.");
   endif
   
-  ## extract tetrahedra node coordinates
+  ## Compute properties
+
+  ## Extract tetrahedra node coordinates
   x1 = imesh.p(1,imesh.t(1,:));
   y1 = imesh.p(2,imesh.t(1,:));
   z1 = imesh.p(3,imesh.t(1,:));
@@ -74,31 +78,31 @@ function [varargout] = MSH3Mgeomprop(imesh,varargin)
     
     request = varargin{nn};
     switch request
-      case "wjacdet"
+      case "wjacdet" # Weighted Jacobian determinant
 	b = wjacdet(x1,y1,z1,\
 		    x2,y2,z2,\
 		    x3,y3,z3,\
 		    x4,y4,z4);
 	varargout{nn} = b;
         clear b
-      case "area"
+      case "area" # Element area
 	tmp = wjacdet(x1,y1,z1,\
 		      x2,y2,z2,\
 		      x3,y3,z3,\
 		      x4,y4,z4);
 	b   = sum(tmp,1);
 	varargout{nn} = b;
-      case "shg"
+      case "shg" # Gradient of shape functions
 	b = shg(x1,y1,z1,\
 		x2,y2,z2,\
 		x3,y3,z3,\
 		x4,y4,z4);
 	varargout{nn} = b;
         clear b
-      case "shp"
+      case "shp" # Value of shape functions
 	varargout{nn} = eye(4);
       otherwise
-	warning("Unexpected value in passed string. Empty vector passed as output.")
+	warning("msh3m_geometrical_properties: unexpected value in property string. Empty vector passed as output.")
 	varargout{nn} = [];
     endswitch
     
@@ -107,9 +111,9 @@ function [varargout] = MSH3Mgeomprop(imesh,varargin)
 endfunction
 
 function [b] = wjacdet(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4)
-  ## COMPUTE WEIGHTED YACOBIAN DETERMINANT
   
-  ## weight
+  ## Compute weighted yacobian determinant
+  
   weight = [1/4 1/4 1/4 1/4]';
 
   Nb2 = y1.*(z3-z4) + y3.*(z4-z1) + y4.*(z1-z3);
@@ -128,8 +132,8 @@ function [b] = wjacdet(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4)
 endfunction
 
 function [b] = shg(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4)
-  ## COMPUTE GRADIENT OF SHAPE FUNCTIONS
-  
+
+  ## Compute gradient of shape functions
 
   Nb2 = y1.*(z3-z4) + y3.*(z4-z1) + y4.*(z1-z3);
   Nb3 = y1.*(z4-z2) + y2.*(z1-z4) + y4.*(z2-z1);
@@ -140,10 +144,10 @@ function [b] = shg(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4)
   ## to the tetrahedron K  
   detJ = (x2-x1).*Nb2 +(x3-x1).*Nb3 +(x4-x1).*Nb4;
  
-  ## Shape function gradients follow
-  ## First index represents space direction
+  ## Shape  function gradients follow
+  ## First  index represents space direction
   ## Second index represents the shape function
-  ## Third index represents the tetrahedron number
+  ## Third  index represents the tetrahedron number
   b(1,1,:) = (y2.*(z4-z3) + y3.*(z2-z4) + y4.*(z3-z2))./ detJ;
   b(2,1,:) = (x2.*(z3-z4) + x3.*(z4-z2) + x4.*(z2-z3))./ detJ;
   b(3,1,:) = (x2.*(y4-y3) + x3.*(y2-y4) + x4.*(y3-y2))./ detJ;
@@ -163,10 +167,10 @@ endfunction
 
 %!shared mesh,wjacdet,shg,shp
 % x = y = z = linspace(0,1,2);
-% [mesh] = MSH3Mstructmesh(x,y,z,1,1:6)
-% [wjacdet] =  MSH3Mgeomprop(mesh,"wjacdet")
-% [shg] =  MSH3Mgeomprop(mesh,"shg")
-% [shp] =  MSH3Mgeomprop(mesh,"shp")
+% [mesh] = msh3m_structured_mesh(x,y,z,1,1:6)
+% [wjacdet] =  msh3m_geometrical_properties(mesh,"wjacdet")
+% [shg] =  msh3m_geometrical_properties(mesh,"shg")
+% [shp] =  msh3m_geometrical_properties(mesh,"shp")
 %!test
 % assert(columns(mesh.t),columns(wjacdet))
 %!test
@@ -174,4 +178,4 @@ endfunction
 %!test
 % assert(shp,eye(4))
 %!test
-% fail(MSH3Mgeomprop(mesh,"samanafattababbudoiu"),"warning","Unexpected value in passed string. Empty vector passed as output.")
+% fail(msh3m_geometrical_properties(mesh,"samanafattababbudoiu"),"warning","Unexpected value in passed string. Empty vector passed as output.")

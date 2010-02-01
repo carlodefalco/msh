@@ -1,91 +1,82 @@
-## Copyright (C) 2007,2009  Carlo de Falco, Massimiliano Culpo
+## Copyright (C) 2006,2007,2008,2009,2010  Carlo de Falco, Massimiliano Culpo
 ##
-## This file is part of 
+## This file is part of:
+##     MSH - Meshing Software Package for Octave
 ##
-##                   MSH - Meshing Software Package for Octave
-## 
 ##  MSH is free software; you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
 ##  the Free Software Foundation; either version 2 of the License, or
 ##  (at your option) any later version.
-## 
+##
 ##  MSH is distributed in the hope that it will be useful,
 ##  but WITHOUT ANY WARRANTY; without even the implied warranty of
 ##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##  GNU General Public License for more details.
-## 
+##
 ##  You should have received a copy of the GNU General Public License
 ##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
 ##
-##
-##  AUTHORS:
-##  Carlo de Falco <cdf _AT_ users.sourceforge.net>
-##
-##  Culpo Massimiliano
-##  Bergische Universitaet Wuppertal
-##  Fachbereich C - Mathematik und Naturwissenschaften
-##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-##  D-42119 Wuppertal, Germany
+##  author: Carlo de Falco     <cdf _AT_ users.sourceforge.net>
+##  author: Massimiliano Culpo <culpo _AT_ users.sourceforge.net>
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{mesh}]} = MSH2Mgmsh(@var{geometry},@var{option},@var{value},...)
+## @deftypefn {Function File} {[@var{mesh}]} = @
+## msh2m_gmsh(@var{geometry},@var{option},@var{value},...)
 ##
 ## Construct an unstructured triangular 2D mesh making use of the free
-## software gmsh. Return a PDE-tool like mesh structure.
+## software gmsh.
 ##
-## Input:
-## @itemize @minus
-## @item @var{geometry}: basename of the ".geo" file to be meshed.
-## @item @var{option}: string of the option to pass gmsh.
-## @item @var{value}: value of the option to pass gmsh.
-## @end itemize
+## The compulsory argument @var{geometry} is the basename of the
+## @code{*.geo} file to be meshed. 
 ##
-## For more information regarding the possible option to pass, refer to gmsh manual or gmsh site:
-## http://www.geuz.org/gmsh/
+## The optional arguments @var{option} and @var{value} identify
+## respectively a gmsh option and its value. For more information
+## regarding the possible option to pass, refer to gmsh manual or gmsh
+## site @url{http://www.geuz.org/gmsh/}. 
 ##
-## @var{mesh} structure is composed of the following fields:
+## The returned value @var{mesh} is a PDE-tool like mesh structure.
 ##
-## @itemize @minus
-## @item @var{p}: 2 X (# nodes) matrix. Contain mesh points coordinates. 
-## @item @var{e}: 7 X (# side edges) matrix. Contain mesh side
-## edges information.
-## @item @var{t}: 4 X (# triangles) matrix. Contain pointer to @var{p}
-## field, as well as region number.
-## @end itemize 
-##
-## @seealso{MSH2Mstructmesh, MSH2Mjoinstructm, MSH2Msubmesh}
+## @seealso{msh2m_structured_mesh, msh3m_gmsh, msh2m_mesh_along_spline}
 ## @end deftypefn
 
-function [mesh] = MSH2Mgmsh(geometry,varargin)
+function [mesh] = msh2m_gmsh(geometry,varargin)
 
-  ## 1. Check input
-  ## 1a. Number of input
-  if !mod(nargin,2)
-    warning("WRONG NUMBER OF INPUT.");
-    print_usage;
+  ## Check input
+  if !mod(nargin,2) # Number of input parameters
+    error("msh2m_gmsh: wrong number of input parameters.");
   endif
+  ## FIXME: add input type check?
 
-  ## 2. Build mesh
+  ## Build mesh
   noptions  = (nargin - 1) / 2; # Number of passed options
   
-  ## 2a. Construct system command string
+  ## Construct system command string
+  verbose   = 1;
   optstring = "";
   for ii = 1:noptions
     option    = varargin{2*(ii)-1};
     value     = varargin{2*ii};
+    ## Check for verbose option
+    if strcmp(option,"v")
+      verbose = value;
+    endif
     if !ischar(value)
       value = num2str(value);
     endif
     optstring = [optstring," -",option," ",value];
   endfor
 
-  ## 2b. Invoke gmsh
-  printf("\n");
-  printf("Generating mesh...\n");
+  ## Invoke gmsh
+  if (verbose)
+    printf("\n");
+    printf("Generating mesh...\n");
+  endif
   system(["gmsh -format msh -2 -o " geometry ".msh" optstring " " geometry ".geo"]);
 
-  ## 2c. Build structure fields
-  printf("Processing gmsh data...\n");
+  ## Build structure fields
+  if (verbose)
+    printf("Processing gmsh data...\n");
+  endif
   ## Points
   com_p   = "awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3 > ""msh_p.txt""}' ";
   ## Side edges
@@ -99,16 +90,20 @@ function [mesh] = MSH2Mgmsh(geometry,varargin)
   
   system(command);
 
-  ## 2d. Create PDE-tool like structure
-  printf("Creating PDE-tool like mesh...\n");
+  ## Create PDE-tool like structure
+  if (verbose)
+    printf("Creating PDE-tool like mesh...\n");
+  endif
   p   = load("msh_p.txt")'; # Mesh-points
   tmp = load("msh_e.txt")'; # Mesh surface-edges
   be  = zeros(7,columns(tmp));
   be([1,2,5],:) = tmp;
   t   = load("msh_t.txt")'; # Mesh tetrahedra
 
-  ## 3. Remove hanging nodes
-  printf("Check for hanging nodes...\n");
+  ## Remove hanging nodes
+  if (verbose)
+    printf("Check for hanging nodes...\n");
+  endif
   nnodes = columns(p);
   in_msh = intersect( 1:nnodes , t(1:3,:) );
   if length(in_msh) != nnodes
@@ -118,18 +113,22 @@ function [mesh] = MSH2Mgmsh(geometry,varargin)
     p               = p(:,in_msh);
   endif
 
-  ## 4. Set region numbers in edge structure
-  printf("Setting region number in edge structure...\n");
+  ## Set region numbers in edge structure
+  if (verbose)
+    printf("Setting region number in edge structure...\n");
+  endif
   msh         = struct("p",p,"t",t,"e",be);
-  msh.be      = MSH2Mtopprop(msh, "boundary");
+  msh.be      = msh2m_topological_properties(msh, "boundary");
   msh.e(6,:)  = msh.t(4,msh.be(1,:));
   jj          = find (sum(msh.be>0)==4);
   msh.e(7,jj) = msh.t(4,msh.be(3,jj)); 
 
   mesh = struct("p",p,"e",be,"t",t);
 
-  ## 5. Delete temporary files
-  printf("Deleting temporary files...\n");
+  ## Delete temporary files
+  if (verbose)
+    printf("Deleting temporary files...\n");
+  endif
   system(["rm -f msh_p.txt msh_e.txt msh_t.txt msh_s.txt *.msh"]);
 
 endfunction
@@ -144,7 +143,7 @@ endfunction
 %! fprintf(fid,"Line Loop(4) = {2, 1};\n");
 %! fprintf(fid,"Plane Surface(4) = {4};");
 %! fclose(fid);
-%! mesh = MSH2Mgmsh("circle","v",0);
+%! mesh = msh2m_gmsh("circle","v",0);
 %! system("rm circle.geo");
 %! nnodest = length(unique(mesh.t));
 %! nnodesp = columns(mesh.p);

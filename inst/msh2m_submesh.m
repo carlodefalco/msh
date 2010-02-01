@@ -1,60 +1,58 @@
-## Copyright (C) 2007,2008  Carlo de Falco, Massimiliano Culpo
+## Copyright (C) 2006,2007,2008,2009,2010  Carlo de Falco, Massimiliano Culpo
 ##
-## This file is part of 
+## This file is part of:
+##     MSH - Meshing Software Package for Octave
 ##
-##                   MSH - Meshing Software Package for Octave
-## 
 ##  MSH is free software; you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by
 ##  the Free Software Foundation; either version 2 of the License, or
 ##  (at your option) any later version.
-## 
+##
 ##  MSH is distributed in the hope that it will be useful,
 ##  but WITHOUT ANY WARRANTY; without even the implied warranty of
 ##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ##  GNU General Public License for more details.
-## 
+##
 ##  You should have received a copy of the GNU General Public License
 ##  along with MSH; If not, see <http://www.gnu.org/licenses/>.
 ##
-##
-##  AUTHORS:
-##  Carlo de Falco <cdf _AT_ users.sourceforge.net>
-##
-##  Culpo Massimiliano
-##  Bergische Universitaet Wuppertal
-##  Fachbereich C - Mathematik und Naturwissenschaften
-##  Arbeitsgruppe fuer Angewandte MathematD-42119 Wuppertal  Gaussstr. 20 
-##  D-42119 Wuppertal, Germany
+##  author: Carlo de Falco     <cdf _AT_ users.sourceforge.net>
+##  author: Massimiliano Culpo <culpo _AT_ users.sourceforge.net>
 
 ## -*- texinfo -*-
-## @deftypefn {Function File} {[@var{omesh},@var{nodelist},@var{elementlist}]} = MSH2Msubmesh(@var{imesh},@var{intrfc},@var{sdl})
+## @deftypefn {Function File} {[@var{omesh},@var{nodelist},@var{elementlist}]} = @
+## msh2m_submesh(@var{imesh},@var{intrfc},@var{sdl})
 ##
-## Gives as output a specified submesh, and the lists of nodes and element that are mantained.
+## Extract the subdomain(s) in @var{sdl} from @var{imesh}.
 ##
-## Input:
-## @itemize @minus
-## @item @var{imesh}: standard PDEtool-like mesh, with field "p", "e", "t".
-## @item @var{intrfc}: row vector containing the number of the internal interface sides (numbering referred to mesh.e(5,:)) that should be mantained.
-##                     Could be empty.
-## @item @var{sdl} (subdomain list): row vector containing the list of the subdomain that are going to be extracted.
-## @end itemize
+## The row vector @var{intrfc} contains the internal interface sides to
+## be maintained (field @code{mesh.e(5,:)}). It can be empty.
 ##
-## Output:
-## @itemize @minus
-## @item @var{omesh}: standard PDEtool-like mesh, with field "p", "e", "t".
-## @item @var{nodelist}: list of the node of the original mesh that are present in the restricted one.
-## @item @var{elementlist}: list of the element of the original mesh that are present in the restricted one.
-## @end itemize 
+## Return the vectors @var{nodelist} and @var{elementlist} containing
+## respectively the list of nodes and elements of the original mesh that
+## are part of the selected subdomain(s).
 ##
-## @seealso{MSH2Mstructmesh,MSH2Mjoinstructm,MSH2Mgmsh}
+## @seealso{msh2m_join_structured_mesh, msh3m_submesh,
+## msh3e_surface_mesh} 
 ## @end deftypefn
 
-function [omesh,nodelist,elementlist] = MSH2Msubmesh(imesh,intrfc,sdl)
+function [omesh,nodelist,elementlist] = msh2m_submesh(imesh,intrfc,sdl)
 
-  nsd = length(sdl);
+  ## Check input
+  if nargin != 3
+    error("msh2m_submesh: wrong number of input parameters.");
+  endif
+  if !isstruct(imesh)
+    error("msh2m_submesh: first input is not a valid mesh structure.");
+  endif
+  if !isvector(sdl)
+    error("msh2m_submesh: third input is not a valid vector.");
+  endif
+  
+  ## Extract sub-mesh
+  nsd = length(sdl); # number of subdomains
 
-  ## set list of output triangles 
+  ## Set list of output triangles 
   elementlist=[];
   for isd=1:nsd
     elementlist = [elementlist find(imesh.t(4,:) == sdl(isd))];
@@ -62,16 +60,16 @@ function [omesh,nodelist,elementlist] = MSH2Msubmesh(imesh,intrfc,sdl)
 
   omesh.t = imesh.t(:,elementlist);
 
-  ## set list of output nodes
+  ## Set list of output nodes
   nodelist          = unique(reshape(imesh.t(1:3,elementlist),1,[]));
   omesh.p         = imesh.p(:,nodelist);
 
-  ## use new node numbering in connectivity matrix
+  ## Use new node numbering in connectivity matrix
   indx(nodelist) = [1:length(nodelist)];
   iel = [1:length(elementlist)];
   omesh.t(1:3,iel) = indx(omesh.t(1:3,iel));
 
-  ## set list of output edges
+  ## Set list of output edges
   omesh.e =[];
   for isd=1:nsd
     omesh.e = [omesh.e imesh.e(:,imesh.e(7,:)==sdl(isd))];
@@ -79,17 +77,17 @@ function [omesh,nodelist,elementlist] = MSH2Msubmesh(imesh,intrfc,sdl)
   endfor
   omesh.e=unique(omesh.e',"rows")';
 
-  ## use new node numbering in boundary segment list
+  ## Use new node numbering in boundary segment list
   ied = [1:size(omesh.e,2)];
   omesh.e(1:2,ied) = indx(omesh.e(1:2,ied));
 
 endfunction
 
 %!test
-%! [mesh1] = MSH2Mstructmesh(0:.5:1, 0:.5:1, 1, 1:4, 'left');
-%! [mesh2] = MSH2Mstructmesh(1:.5:2, 0:.5:1, 1, 1:4, 'left');
-%! [mesh] = MSH2Mjoinstructm(mesh1,mesh2,2,4);
-%! [omesh,nodelist,elementlist] = MSH2Msubmesh(mesh,[],2);
+%! [mesh1] = msh2m_structured_mesh(0:.5:1, 0:.5:1, 1, 1:4, 'left');
+%! [mesh2] = msh2m_structured_mesh(1:.5:2, 0:.5:1, 1, 1:4, 'left');
+%! [mesh]  = msh2m_join_structured_mesh(mesh1,mesh2,2,4);
+%! [omesh,nodelist,elementlist] = msh2m_submesh(mesh,[],2);
 %! p = [1.00000   1.00000   1.00000   1.50000   1.50000   1.50000   2.00000   2.00000   2.00000
 %!      0.00000   0.50000   1.00000   0.00000   0.50000   1.00000   0.00000   0.50000   1.00000];
 %! e = [1   1   2   3   4   6   7   8
