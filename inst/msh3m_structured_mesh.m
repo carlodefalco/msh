@@ -84,7 +84,7 @@ function [mesh] = msh3m_structured_mesh(x,y,z,region,sides)
     error("msh3m_structured_mesh: X, Y, Z must be valid numeric vectors.");
   elseif !isscalar(region)
     error("msh3m_structured_mesh: REGION must be a valid scalar.");
-  elseif !(isvector(sides) && (length(sides) == 4))
+  elseif !(isvector(sides) && (length(sides) == 6))
     error("msh3m_structured_mesh: SIDES must be a 4 components vector.");
   endif
 
