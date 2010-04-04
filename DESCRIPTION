@@ -1,6 +1,6 @@
 Name: msh
-Version: 1.0.1
-Date: 2010-03-30
+Version: 1.0.2
+Date: 2010-04-04
 Author: Carlo de Falco, Massimiliano Culpo
 Maintainer: Carlo de Falco, Massimiliano Culpo
 Title: MeSHing software package for octave
@@ -9,5 +9,5 @@ Depends: octave (>= 3.0), splines
 SystemRequirements: gmsh (>= 1.6.5), awk
 Autoload: no
 License: GPL version 2 or later
-Url: http://www.geuz.org/gmsh
-SVNRelease: 7141
+Url: http://octave.sf.net, http://www.geuz.org/gmsh
+SVNRelease: 7152

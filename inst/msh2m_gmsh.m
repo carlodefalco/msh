@@ -39,7 +39,7 @@
 ## @seealso{msh2m_structured_mesh, msh3m_gmsh, msh2m_mesh_along_spline}
 ## @end deftypefn
 
-function [mesh] = msh2m_gmsh(geometry,varargin)
+function mesh = msh2m_gmsh(geometry,varargin)
 
   ## Check input
   if !mod(nargin,2) # Number of input parameters
@@ -117,14 +117,12 @@ function [mesh] = msh2m_gmsh(geometry,varargin)
   if (verbose)
     printf("Setting region number in edge structure...\n");
   endif
-  msh         = struct("p",p,"t",t,"e",be);
-  msh.be      = msh2m_topological_properties(msh, "boundary");
-  msh.e(6,:)  = msh.t(4,msh.be(1,:));
-  jj          = find (sum(msh.be>0)==4);
-  msh.e(7,jj) = msh.t(4,msh.be(3,jj)); 
-
-  mesh = struct("p",p,"e",be,"t",t);
-
+  mesh          = struct("p",p,"t",t,"e",be);
+  tmp           = msh2m_topological_properties (mesh, "boundary");
+  mesh.e(6,:)   = t(4,tmp(1,:));
+  jj            = find (sum(tmp>0)==4);
+  mesh.e(7,jj)  = t(4,tmp(3,jj)); 
+  
   ## Delete temporary files
   if (verbose)
     printf("Deleting temporary files...\n");
@@ -148,3 +146,31 @@ endfunction
 %! nnodest = length(unique(mesh.t));
 %! nnodesp = columns(mesh.p);
 %! assert(nnodest,nnodesp);
+
+%!demo
+%! name = [tmpnam ".geo"];
+%! fid = fopen (name, "w");
+%! fputs (fid, "Point(1) = {0, 0, 0, .1};\n");
+%! fputs (fid, "Point(2) = {1, 0, 0, .1};\n");
+%! fputs (fid, "Point(3) = {1, 0.5, 0, .1};\n");
+%! fputs (fid, "Point(4) = {1, 1, 0, .1};\n");
+%! fputs (fid, "Point(5) = {0, 1, 0, .1};\n");
+%! fputs (fid, "Point(6) = {0, 0.5, 0, .1};\n");
+%! fputs (fid, "Line(1) = {1, 2};\n");
+%! fputs (fid, "Line(2) = {2, 3};\n");
+%! fputs (fid, "Line(3) = {3, 4};\n");
+%! fputs (fid, "Line(4) = {4, 5};\n");
+%! fputs (fid, "Line(5) = {5, 6};\n");
+%! fputs (fid, "Line(6) = {6, 1};\n");
+%! fputs (fid, "Point(7) = {0.2, 0.6, 0};\n");
+%! fputs (fid, "Point(8) = {0.5, 0.4, 0};\n");
+%! fputs (fid, "Point(9) = {0.7, 0.6, 0};\n");
+%! fputs (fid, "BSpline(7) = {6, 7, 8, 9, 3};\n");
+%! fputs (fid, "Line Loop(8) = {6, 1, 2, -7};\n");
+%! fputs (fid, "Plane Surface(9) = {8};\n");
+%! fputs (fid, "Line Loop(10) = {7, 3, 4, 5};\n");
+%! fputs (fid, "Plane Surface(11) = {10};\n");
+%! fclose (fid);
+%! mesh = msh2m_gmsh (canonicalize_file_name (name)(1:end-4), "clscale", ".5");
+%! trimesh (mesh.t(1:3,:)', mesh.p(1,:)', mesh.p(2,:)');
+%! unlink (canonicalize_file_name (name))
