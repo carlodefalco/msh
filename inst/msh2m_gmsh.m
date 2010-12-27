@@ -80,9 +80,9 @@ function mesh = msh2m_gmsh(geometry,varargin)
   ## Points
   com_p   = "awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3 > ""msh_p.txt""}' ";
   ## Side edges
-  com_e   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""1"") print $7, $8,$5 > ""msh_e.txt""}' ";
+  com_e   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""1"") print $(n+1), $(n+2), $5 > ""msh_e.txt""}' ";
   ## Triangles
-  com_t   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""2"") print $7, $8, $9, $5 > ""msh_t.txt""}' ";
+  com_t   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""2"") print $(n+1), $(n+2), $(n+3), $5 > ""msh_t.txt""}' ";
 
   command = [com_p,geometry,".msh ; "];
   command = [command,com_e,geometry,".msh ; "];

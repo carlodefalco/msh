@@ -81,11 +81,11 @@ function [mesh] = msh3m_gmsh(geometry,varargin)
   ## Points
   com_p   = "awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3, $4 > ""msh_p.txt""}' ";
   ## Surface edges
-  com_e   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""2"") print $7, $8, $9, $5 > ""msh_e.txt""}' ";
+  com_e   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""2"") print $(n+1), $(n+2), $(n+3), $5 > ""msh_e.txt""}' ";
   ## Tetrahedra
-  com_t   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""4"") print $7, $8, $9, $10, $5 > ""msh_t.txt""}' ";
+  com_t   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""4"") print $(n+1), $(n+2), $(n+3), $(n+4), $5 > ""msh_t.txt""}' ";
   ## Side edges
-  com_s   = "awk '/\\$Elements/,/\\$EndElements/ {if ($2 == ""1"") print $7, $8, $5 > ""msh_s.txt""}' ";
+  com_s   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""1"") print $(n+2), $(n+2), $5 > ""msh_s.txt""}' ";
 
   command = [com_p,geometry,".msh ; "];
   command = [command,com_e,geometry,".msh ; "];
