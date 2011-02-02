@@ -85,7 +85,7 @@ function [mesh] = msh3m_structured_mesh(x,y,z,region,sides)
   elseif !isscalar(region)
     error("msh3m_structured_mesh: REGION must be a valid scalar.");
   elseif !(isvector(sides) && (length(sides) == 6))
-    error("msh3m_structured_mesh: SIDES must be a 4 components vector.");
+    error("msh3m_structured_mesh: SIDES must be a 6 components vector.");
   endif
 
   ## Build mesh
