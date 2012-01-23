@@ -134,7 +134,7 @@ function mesh = msh3m_join_structured_mesh(mesh1,mesh2,s1,s2)
   ## Set adjacent region numbers in edge structure 1
   for is = 1:length(s1)
     ii            = find( mesh1.e(10,:)==s1(is) );
-    mesh1.e(8,ii) = newregions(regions(adreg(is,:)));
+    mesh1.e(8,ii) = newregions(adreg(is,:));
   endfor
 
   ## Build new mesh structure
