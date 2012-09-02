@@ -1,13 +1,12 @@
 Name: msh
-Version: 1.0.2
-Date: 2010-04-04
+Version: 1.0.4
+Date: 2012-08-2
 Author: Carlo de Falco, Massimiliano Culpo
 Maintainer: Carlo de Falco, Massimiliano Culpo
 Title: MeSHing software package for octave
 Description: Create and manage triangular and tetrahedral meshes for Finite Element or Finite Volume PDE solvers. Use a mesh data structure compatible with PDEtool. Rely on gmsh for unstructured mesh generation.
 Depends: octave (>= 3.0), splines
-SystemRequirements: gmsh (>= 1.6.5), awk
+SystemRequirements: gmsh (>= 1.6.5 (optional)), awk (optional)
 Autoload: no
 License: GPL version 2 or later
 Url: http://octave.sf.net, http://www.geuz.org/gmsh
-SVNRelease: 7154

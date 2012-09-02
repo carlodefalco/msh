@@ -21,7 +21,7 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{mesh}]} = @
-## msh3m_gmsh(@var{geometry},@var{option},@var{value},...) 
+## msh3m_gmsh(@var{geometry}, @var{option}, @var{value}, ...) 
 ##
 ## Construct an unstructured tetrahedral 3D mesh making use of the free
 ## software gmsh.
@@ -39,11 +39,11 @@
 ## @seealso{msh3m_structured_mesh, msh2m_gmsh, msh2m_mesh_along_spline}
 ## @end deftypefn
 
-function [mesh] = msh3m_gmsh(geometry,varargin)
+function mesh = msh3m_gmsh (geometry, varargin)
 
   ## Check input
   ## Number of input
-  if !mod(nargin,2)
+  if !(mod (nargin,2))
     warning("WRONG NUMBER OF INPUT.");
     print_usage;
   endif
