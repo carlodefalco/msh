@@ -1,4 +1,4 @@
-## Copyright (C) 2006,2007,2008,2009,2010  Carlo de Falco, Massimiliano Culpo
+## Copyright (C) 2006,2007,2008,2009,2010,2012  Carlo de Falco, Massimiliano Culpo
 ##
 ## This file is part of:
 ##     MSH - Meshing Software Package for Octave
@@ -21,12 +21,13 @@
 
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{mesh}]} = @
-## msh3m_gmsh(@var{geometry}, @var{option}, @var{value}, ...) 
+## msh3m_gmsh(@var{geometry},@var{option},@var{value},...) 
+## @deftypefnx {Function File}{[@var{mesh}, @var{gmsh_out}]} = msh3m_gmsh(...) 
 ##
 ## Construct an unstructured tetrahedral 3D mesh making use of the free
 ## software gmsh.
 ##
-## The compulsory argument @var{geometry} is the basename of the
+## The required argument @var{geometry} is the basename of the
 ## @code{*.geo} file to be meshed. 
 ##
 ## The optional arguments @var{option} and @var{value} identify
@@ -35,15 +36,17 @@
 ## site @url{http://www.geuz.org/gmsh/}. 
 ##
 ## The returned value @var{mesh} is a PDE-tool like mesh structure.
+## If the function is called with two outputs @var{gmsh_out} is the verbose output
+## of the gmsh subprocess.
 ##
 ## @seealso{msh3m_structured_mesh, msh2m_gmsh, msh2m_mesh_along_spline}
 ## @end deftypefn
 
-function mesh = msh3m_gmsh (geometry, varargin)
+function [mesh, gmsh_output] = msh3m_gmsh (geometry, varargin)
 
   ## Check input
   ## Number of input
-  if !(mod (nargin,2))
+  if !mod(nargin,2)
     warning("WRONG NUMBER OF INPUT.");
     print_usage;
   endif
@@ -73,19 +76,29 @@ function mesh = msh3m_gmsh (geometry, varargin)
     printf("\n");
     printf("Generating mesh...\n");
   endif
-  system(["gmsh -format msh -3 -o " geometry ".msh" optstring " " geometry ".geo"]);
-  
+  [status, gmsh_output] = system (["gmsh -format msh -3 -o " geometry ".msh" optstring " " geometry ".geo 2>&1"]);
+  if (status)
+    error ("msh3m_gmsh: the gmesh subprocess exited abnormally");
+  endif
+
   if (verbose)
     printf("Processing gmsh data...\n");
   endif
+
+  fname = tmpnam ();
+  e_filename = strcat (fname, "_e.txt");
+  p_filename = strcat (fname, "_p.txt");
+  t_filename = strcat (fname, "_t.txt");
+  s_filename = strcat (fname, "_s.txt");
+
   ## Points
-  com_p   = "awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3, $4 > ""msh_p.txt""}' ";
+  com_p   = sprintf ("awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3, $4 > ""%s""}' ", p_filename);
   ## Surface edges
-  com_e   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""2"") print $(n+1), $(n+2), $(n+3), $5 > ""msh_e.txt""}' ";
+  com_e   = sprintf ("awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""2"") print $(n+1), $(n+2), $(n+3), $5 > ""%s""}' ", e_filename);
   ## Tetrahedra
-  com_t   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""4"") print $(n+1), $(n+2), $(n+3), $(n+4), $5 > ""msh_t.txt""}' ";
+  com_t   = sprintf ("awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""4"") print $(n+1), $(n+2), $(n+3), $(n+4), $5 > ""%s""}' ", t_filename);
   ## Side edges
-  com_s   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""1"") print $(n+2), $(n+2), $5 > ""msh_s.txt""}' ";
+  com_s   = sprintf ("awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""1"") print $(n+2), $(n+2), $5 > ""%s""}' ", s_filename);
 
   command = [com_p,geometry,".msh ; "];
   command = [command,com_e,geometry,".msh ; "];
@@ -99,15 +112,15 @@ function mesh = msh3m_gmsh (geometry, varargin)
     printf("Creating PDE-tool like mesh...\n");
   endif
   ## Mesh-points
-  p   = load("msh_p.txt")';
+  p   = load(p_filename)';
   ## Mesh side-edges
-  s   = load("msh_s.txt")';
+  s   = load(s_filename)';
   ## Mesh surface-edges
-  tmp = load("msh_e.txt")';
+  tmp = load(e_filename)';
   be  = zeros(10,columns(tmp));
   be([1,2,3,10],:) = tmp;
   ## Mesh tetrahedra
-  t   = load("msh_t.txt")';
+  t   = load(t_filename)';
 
 
   ## Remove hanging nodes
@@ -128,6 +141,10 @@ function mesh = msh3m_gmsh (geometry, varargin)
   if (verbose)
     printf("Deleting temporary files...\n");
   endif
-  system(["rm -f msh_p.txt msh_e.txt msh_t.txt msh_s.txt *.msh"]);
+  unlink (p_filename);
+  unlink (e_filename);
+  unlink (t_filename);
+  unlink (s_filename);
+  unlink (strcat (geometry, ".msh"));
 
 endfunction

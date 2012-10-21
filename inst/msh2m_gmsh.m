@@ -1,4 +1,4 @@
-## Copyright (C) 2006,2007,2008,2009,2010  Carlo de Falco, Massimiliano Culpo
+## Copyright (C) 2006,2007,2008,2009,2010,2012  Carlo de Falco, Massimiliano Culpo
 ##
 ## This file is part of:
 ##     MSH - Meshing Software Package for Octave
@@ -22,6 +22,7 @@
 ## -*- texinfo -*-
 ## @deftypefn {Function File} {[@var{mesh}]} = @
 ## msh2m_gmsh(@var{geometry},@var{option},@var{value},...)
+## @deftypefnx {Function File}{[@var{mesh}, @var{gmsh_out}]} = msh2m_gmsh(...) 
 ##
 ## Construct an unstructured triangular 2D mesh making use of the free
 ## software gmsh.
@@ -35,11 +36,13 @@
 ## site @url{http://www.geuz.org/gmsh/}. 
 ##
 ## The returned value @var{mesh} is a PDE-tool like mesh structure.
+## If the function is called with two outputs @var{gmsh_out} is the verbose output
+## of the gmsh subprocess.
 ##
 ## @seealso{msh2m_structured_mesh, msh3m_gmsh, msh2m_mesh_along_spline}
 ## @end deftypefn
 
-function mesh = msh2m_gmsh(geometry,varargin)
+function [mesh, gmsh_output] = msh2m_gmsh (geometry, varargin)
 
   ## Check input
   if !mod(nargin,2) # Number of input parameters
@@ -71,34 +74,42 @@ function mesh = msh2m_gmsh(geometry,varargin)
     printf("\n");
     printf("Generating mesh...\n");
   endif
-  system(["gmsh -format msh -2 -o " geometry ".msh" optstring " " geometry ".geo"]);
+  [status, gmsh_output] = system (["gmsh -format msh -2 -o " geometry ".msh" optstring " " geometry ".geo 2>&1 "]);
+  if (status)
+    error ("msh2m_gmsh: the gmesh subprocess exited abnormally");
+  endif
 
+  fname = tmpnam ();
+  e_filename = strcat (fname, "_e.txt");
+  p_filename = strcat (fname, "_p.txt");
+  t_filename = strcat (fname, "_t.txt");
+  
   ## Build structure fields
   if (verbose)
     printf("Processing gmsh data...\n");
   endif
   ## Points
-  com_p   = "awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3 > ""msh_p.txt""}' ";
+  com_p   = sprintf ("awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3 > ""%s""}' ", p_filename);
   ## Side edges
-  com_e   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""1"") print $(n+1), $(n+2), $5 > ""msh_e.txt""}' ";
+  com_e   = sprintf ("awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""1"") print $(n+1), $(n+2), $5 > ""%s""}' ", e_filename);
   ## Triangles
-  com_t   = "awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""2"") print $(n+1), $(n+2), $(n+3), $5 > ""msh_t.txt""}' ";
+  com_t   = sprintf ("awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""2"") print $(n+1), $(n+2), $(n+3), $5 > ""%s""}' ", t_filename);
 
   command = [com_p,geometry,".msh ; "];
   command = [command,com_e,geometry,".msh ; "];
   command = [command,com_t,geometry,".msh"];
   
-  system(command);
+  system (command);
 
   ## Create PDE-tool like structure
   if (verbose)
     printf("Creating PDE-tool like mesh...\n");
   endif
-  p   = load("msh_p.txt")'; # Mesh-points
-  tmp = load("msh_e.txt")'; # Mesh surface-edges
+  p   = load(p_filename)'; # Mesh-points
+  tmp = load(e_filename)'; # Mesh surface-edges
   be  = zeros(7,columns(tmp));
   be([1,2,5],:) = tmp;
-  t   = load("msh_t.txt")'; # Mesh tetrahedra
+  t   = load(t_filename)'; # Mesh tetrahedra
 
   ## Remove hanging nodes
   if (verbose)
@@ -127,7 +138,10 @@ function mesh = msh2m_gmsh(geometry,varargin)
   if (verbose)
     printf("Deleting temporary files...\n");
   endif
-  system(["rm -f msh_p.txt msh_e.txt msh_t.txt msh_s.txt *.msh"]);
+  unlink (p_filename);
+  unlink (e_filename);
+  unlink (t_filename);
+  unlink (strcat (geometry, ".msh"));
 
 endfunction
 
@@ -173,4 +187,4 @@ endfunction
 %! fclose (fid);
 %! mesh = msh2m_gmsh (canonicalize_file_name (name)(1:end-4), "clscale", ".5");
 %! trimesh (mesh.t(1:3,:)', mesh.p(1,:)', mesh.p(2,:)');
-%! unlink (canonicalize_file_name (name))
+%! unlink (canonicalize_file_name (name));
