@@ -74,15 +74,24 @@ function [mesh, gmsh_output] = msh2m_gmsh (geometry, varargin)
     printf("\n");
     printf("Generating mesh...\n");
   endif
-  [status, gmsh_output] = system (["gmsh -format msh -2 -o " geometry ".msh" optstring " " geometry ".geo 2>&1 "]);
+
+  msh_name = strcat (tmpnam (), ".msh");
+  fclose (fopen (msh_name, "w"));
+
+  [status, gmsh_output] = system (["gmsh -format msh -2 -o " msh_name optstring " " geometry ".geo 2>&1 "]);
   if (status)
     error ("msh2m_gmsh: the gmesh subprocess exited abnormally");
   endif
 
   fname = tmpnam ();
-  e_filename = strcat (fname, "_e.txt");
-  p_filename = strcat (fname, "_p.txt");
-  t_filename = strcat (fname, "_t.txt");
+  fclose (fopen (strcat (fname, "_e.txt"), "w"));
+  e_filename =  canonicalize_file_name (strcat (fname, "_e.txt"));
+
+  fclose (fopen (strcat (fname, "_p.txt"), "w"));
+  p_filename =  canonicalize_file_name (strcat (fname, "_p.txt"));
+
+  fclose (fopen (strcat (fname, "_t.txt"), "w"));
+  t_filename =  canonicalize_file_name (strcat (fname, "_t.txt"));
   
   ## Build structure fields
   if (verbose)
@@ -95,9 +104,9 @@ function [mesh, gmsh_output] = msh2m_gmsh (geometry, varargin)
   ## Triangles
   com_t   = sprintf ("awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""2"") print $(n+1), $(n+2), $(n+3), $5 > ""%s""}' ", t_filename);
 
-  command = [com_p,geometry,".msh ; "];
-  command = [command,com_e,geometry,".msh ; "];
-  command = [command,com_t,geometry,".msh"];
+  command = [com_p, msh_name, ";"];
+  command = [command, com_e, msh_name, ";"];
+  command = [command, com_t, msh_name];
   
   system (command);
 
@@ -141,7 +150,7 @@ function [mesh, gmsh_output] = msh2m_gmsh (geometry, varargin)
   unlink (p_filename);
   unlink (e_filename);
   unlink (t_filename);
-  unlink (strcat (geometry, ".msh"));
+  unlink (msh_name);
 
 endfunction
 

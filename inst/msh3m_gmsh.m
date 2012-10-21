@@ -76,7 +76,11 @@ function [mesh, gmsh_output] = msh3m_gmsh (geometry, varargin)
     printf("\n");
     printf("Generating mesh...\n");
   endif
-  [status, gmsh_output] = system (["gmsh -format msh -3 -o " geometry ".msh" optstring " " geometry ".geo 2>&1"]);
+
+  msh_name = strcat (tmpnam (), ".msh");
+  fclose (fopen (msh_name, "w"));
+
+  [status, gmsh_output] = system (["gmsh -format msh -3 -o " msh_name optstring " " geometry ".geo 2>&1"]);
   if (status)
     error ("msh3m_gmsh: the gmesh subprocess exited abnormally");
   endif
@@ -86,10 +90,17 @@ function [mesh, gmsh_output] = msh3m_gmsh (geometry, varargin)
   endif
 
   fname = tmpnam ();
-  e_filename = strcat (fname, "_e.txt");
-  p_filename = strcat (fname, "_p.txt");
-  t_filename = strcat (fname, "_t.txt");
-  s_filename = strcat (fname, "_s.txt");
+  fclose (fopen (strcat (fname, "_e.txt"), "w"));
+  e_filename =  canonicalize_file_name (strcat (fname, "_e.txt"));
+
+  fclose (fopen (strcat (fname, "_p.txt"), "w"));
+  p_filename =  canonicalize_file_name (strcat (fname, "_p.txt"));
+
+  fclose (fopen (strcat (fname, "_t.txt"), "w"));
+  t_filename =  canonicalize_file_name (strcat (fname, "_t.txt"));
+
+  fclose (fopen (strcat (fname, "_s.txt"), "w"));
+  s_filename =  canonicalize_file_name (strcat (fname, "_s.txt"));
 
   ## Points
   com_p   = sprintf ("awk '/\\$Nodes/,/\\$EndNodes/ {print $2, $3, $4 > ""%s""}' ", p_filename);
@@ -100,12 +111,12 @@ function [mesh, gmsh_output] = msh3m_gmsh (geometry, varargin)
   ## Side edges
   com_s   = sprintf ("awk '/\\$Elements/,/\\$EndElements/ {n=3+$3; if ($2 == ""1"") print $(n+2), $(n+2), $5 > ""%s""}' ", s_filename);
 
-  command = [com_p,geometry,".msh ; "];
-  command = [command,com_e,geometry,".msh ; "];
-  command = [command,com_t,geometry,".msh ; "];
-  command = [command,com_s,geometry,".msh"];
+  command = [com_p, msh_name, ";"];
+  command = [command, com_e, msh_name, ";"];
+  command = [command, com_t, msh_name, ";"];
+  command = [command, com_s, msh_name];
   
-  system(command);
+  system (command);
 
   ## Create PDE-tool like structure
   if (verbose)
@@ -145,6 +156,6 @@ function [mesh, gmsh_output] = msh3m_gmsh (geometry, varargin)
   unlink (e_filename);
   unlink (t_filename);
   unlink (s_filename);
-  unlink (strcat (geometry, ".msh"));
+  unlink (msh_name);
 
 endfunction
