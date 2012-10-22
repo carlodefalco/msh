@@ -8,5 +8,5 @@ Description: Create and manage triangular and tetrahedral meshes for Finite Elem
 Depends: octave (>= 3.0), splines
 SystemRequirements: gmsh (>= 1.6.5 (optional)), awk (optional)
 Autoload: no
-License: GPL version 2 or later
+License: GPLv2+
 Url: http://octave.sf.net, http://www.geuz.org/gmsh
