@@ -78,9 +78,9 @@ function mesh = msh3m_structured_mesh (x, y, z, region, sides)
   ## Check input
   if (nargin != 5) # Number of input parameters
     print_usage ();
-  elseif !(isvector(x) && isnumeric(x) 
-           && isvector(y) && isnumeric(y) 
-           && isvector(z) && isnumeric(z))
+  elseif !(isvector (x) && isnumeric (x) && ! isscalar (x)
+           && isvector (y) && isnumeric (y) && ! isscalar (y)
+           && isvector (z) && isnumeric (z) && ! isscalar (z))
     error("msh3m_structured_mesh: X, Y, Z must be valid numeric vectors.");
   elseif !isscalar(region)
     error("msh3m_structured_mesh: REGION must be a valid scalar.");
@@ -102,30 +102,20 @@ function mesh = msh3m_structured_mesh (x, y, z, region, sides)
   [XX, YY, ZZ] = meshgrid (x, y, z);
   p = [XX(:), YY(:), ZZ(:)]';
 
-  [t, e] =  __t6_connections__ (nx, ny, nz);
-
-  ## Assemble structure
-  mesh = struct ('p', p, 'e', e, 't', t);
-  mesh.e (9,:) = region;
-  mesh.t (5,:) = region;
-
-endfunction
-
-function [t, e] =  __t6_connections__ (nx, ny, nz)
+  iiv (ny,nx,nz)=0;
+  iiv(:)=1:nx*ny*nz;
+  iiv(end,:,:)=[];
+  iiv(:,end,:)=[];
+  iiv(:,:,end)=[];
+  iiv=iiv(:)';
 
   ## Generate connections:
-
-  iiv = reshape (1:nx*ny*nz, [ny, nx, nz]);
-  iiv(end,:,:) = [];
-  iiv(:,end,:) = [];
-  iiv(:,:,end) = [];
-  iiv = iiv(:)';
 
   n1 = iiv; # bottom faces
   n2 = iiv + 1;
   n3 = iiv + ny;
   n4 = iiv + ny + 1;
-  
+
   N1 = iiv + nx * ny; # top faces
   N2 = N1  + 1;
   N3 = N1  + ny;
@@ -149,12 +139,12 @@ function [t, e] =  __t6_connections__ (nx, ny, nz)
   for jj=1:length (ii)
     e1(:,jj) = t(order(:,ii(jj)),ii(jj));
   endfor
-  e1(10,:) = sides (1);
+  e1(10,:) = sides(1);
 
   ## right
   T(:) = p(1,t)' == x(end);
-  [~, order] = sort(T,1);
-  ii = (find(sum(T,1)==3));
+  [~, order] = sort (T, 1);
+  ii = (find (sum (T, 1) == 3));
   order(1,:) = [];
   for jj=1:length (ii)
     e2(:,jj) = t(order(:,ii(jj)),ii(jj));
@@ -163,8 +153,8 @@ function [t, e] =  __t6_connections__ (nx, ny, nz)
 
   ## front
   T(:) = p(2,t)' == y(1);
-  [~, order] = sort(T,1);
-  ii = (find (sum (T,1) == 3));
+  [~, order] = sort (T, 1);
+  ii = (find (sum (T, 1) == 3));
   order(1,:) = [];
   for jj=1:length (ii)
     e3(:,jj) = t(order(:,ii(jj)),ii(jj));
@@ -203,11 +193,14 @@ function [t, e] =  __t6_connections__ (nx, ny, nz)
   endfor
   e6(10,:) = sides(6);
 
-  e = [e1, e2, e3, e4, e5, e6];
+  ## Assemble structure
+  mesh.e       = [e1,e2,e3,e4,e5,e6];
+  mesh.t       = t;
+  mesh.e (9,:) = region;
+  mesh.t (5,:) = region;
+  mesh.p       = p;
 
 endfunction
-
-
 
 %!test
 % x = y = z = linspace (0,1,2)
@@ -215,21 +208,25 @@ endfunction
 % assert = (columns (mesh.p), 8)
 % assert = (columns (mesh.t), 6)
 % assert = (columns (mesh.e), 12)
+
 %!test
-% x = y = z = linspace (0,1,3)
-% [mesh] = msh3m_structured_mesh (x, y, z, 1, 1:6)
-% assert = (columns (mesh.p), 27)
-% assert = (columns (mesh.t), 48)
-% assert = (columns (mesh.e), 48)
+%! x = y = z = linspace (0, 1, 3);
+%! mesh = msh3m_structured_mesh (x, y, z, 1, 1:6);
+%! assert (columns (mesh.p), 27)
+%! assert (columns (mesh.t), 48)
+%! assert (columns (mesh.e), 48)
+
 %!test
-% x = y = z = linspace (0,1,4)
-% [mesh] = msh3m_structured_mesh (x, y, z, 1, 1:6)
-% assert = (columns (mesh.p), 64)
-% assert = (columns (mesh.t), 162)
-% assert = (columns (mesh.e), 108)
+%! x = y = z = linspace (0,1,4);
+%! [mesh] = msh3m_structured_mesh (x, y, z, 1, 1:6);
+%! assert (columns (mesh.p), 64)
+%! assert (columns (mesh.t), 162)
+%! assert (columns (mesh.e), 108)
+
 %!test
-% x = y = z = linspace (0,1,1)
-% fail([mesh] = msh3m_structured_mesh (x, y, z, 1, 1:6), "warning", "x, y, z cannot be scalar numbers!")
+%! x = y = z = linspace (0, 1, 1);
+%! fail("mesh = msh3m_structured_mesh (x, y, z, 1, 1:6)", "msh3m_structured_mesh: X, Y, Z must be valid numeric vectors.");
+
 %!test
-% x = y = z = eye(2)
-% fail([mesh] = msh3m_structured_mesh (x, y, z, 1, 1:6),"warning", "x, y, z cannot be matrices!")
+%! x = y = z = eye (2);
+%! fail("mesh = msh3m_structured_mesh (x, y, z, 1, 1:6)", "msh3m_structured_mesh: X, Y, Z must be valid numeric vectors.");
