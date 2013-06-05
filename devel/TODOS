@@ -1,0 +1,6 @@
+
+Add the refine function available in dolfin
+
+Add the information contained in the "e" matrix
+about the number of the geometrical border
+containing the side edge to the .xml format.
