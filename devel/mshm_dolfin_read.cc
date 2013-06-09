@@ -21,18 +21,13 @@
 
 DEFUN_DLD (mshm_dolfin_read, args, ,
 "-*- texinfo -*-\n\
-@deftypefn {Function File} {[@var{mesh}]} = @\n\
-mshm_dolfin_read(@var{mesh_to_read})\n\
-\n\
-Read a dolfin mesh in .xml format and import it to Octave.\n\
-\n\
-@itemize @bullet\n\
-@item @var{mesh_to_read} is the name of the mesh you want to read.\n\
-@end itemize\n\
-\n\
-The returned value @var{mesh} is a PDE-tool like structure\n\
-composed of the matrices (p,e,t).\n\
-\n\
+@deftypefn {Function File} {[@var{mesh}]} = \
+mshm_dolfin_read (@var{mesh_to_read}) \n\
+Read a mesh from a dolfin .xml.gz file.\n\
+The string @var{mesh_to_read} should be the name of the \
+mesh file to be read.\n\
+The output @var{mesh} is a PDE-tool like structure\n\
+with matrix fields (p,e,t).\n\
 @seealso{msh3m_structured_mesh, msh2m_structured_mesh, mshm_dolfin_write}\n\
 @end deftypefn")
 {
@@ -51,34 +46,33 @@ composed of the matrices (p,e,t).\n\
 
 	  std::size_t num_v = mesh.num_vertices ();
 	  Matrix p (D, num_v);
-	  std::vector<double> my_coord = mesh.coordinates ();
+	  std::vector<double> my_coord = mesh.coordinates (); 
 	  std::size_t n = 0;
 
 	  for (octave_idx_type j=0; j < num_v; ++j)
-	    for (octave_idx_type i =0; i < D; ++i,++n)
+	    for (octave_idx_type i =0; i < D; ++i, ++n)
 	      p(i,j) = my_coord[n];
-	    
 
 	  mesh.init (D - 1, D);
 	  std::size_t num_f = mesh.num_facets ();
 	  Matrix e;
-	  if(D == 2)
+
+	  if (D == 2)
 	    e.resize (7, num_f);
-	  if(D == 3)
+
+	  if (D == 3)
 	    e.resize (10, num_f);
 
-	  octave_idx_type l=0;
-	  octave_idx_type m=0;
+	  octave_idx_type l = 0;
+	  octave_idx_type m = 0;
 
-	  for (dolfin::FacetIterator f (mesh); !f.end (); ++f)
+	  for (dolfin::FacetIterator f (mesh); ! f.end (); ++f)
 	    {
-	      if ( (*f).exterior () == true)
+	      if ((*f).exterior () == true)
 		{
 		  l = 0;
-		  for (dolfin::VertexIterator v (*f); !v.end (); ++v,++l)
-		    { 
-		      e(l,m) = (*v).index () + 1 ;
-		    }
+		  for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l) 
+                    e(l, m) = (*v).index () + 1 ;
 		  ++m;
 		}   
 	    }
@@ -86,13 +80,13 @@ composed of the matrices (p,e,t).\n\
 	  if (D == 2) 
 	    {
 	      e.resize (7, m);
-	      e.fill (1, 6, 0, 6, m-1);
+	      e.fill (1, 6, 0, 6, m - 1);
 	    }
 
 	  if (D == 3) 
 	    {
 	      e.resize (10, m);
-	      e.fill (1, 9, 0, 9, m-1);
+	      e.fill (1, 9, 0, 9, m - 1);
 	    }
   
 	  
@@ -107,19 +101,19 @@ composed of the matrices (p,e,t).\n\
 	      t(i,j) += my_cells[n]; 
 
 	  Octave_map a;
-	  a.assign ("p", octave_value (p));
-	  a.assign ("e", octave_value (e));
-	  a.assign ("t", octave_value (t));
+	  a.assign ("p", p);
+	  a.assign ("e", e);
+	  a.assign ("t", t);
 	  retval = octave_value (a);
 	}
     }
+
   return retval;
 }
 
 
 /*
 %!demo
-%! mesh = mshm_dolfin_read("dolfin_fine.xml.gz" );
+%! mesh = mshm_dolfin_read ("dolfin_fine.xml.gz" );
 %! msh2p_mesh(mesh);
-
 */
