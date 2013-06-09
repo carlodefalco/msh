@@ -1,25 +1,10 @@
 These are the source codes for the conversion
- of a .xml mesh to/from a (p,e,t) mesh.
+ of a dolfin  mesh to/from a (p,e,t) mesh.
 
 You need dolfin to compile and execute it:
 
 mkoctfile xml2oct.cc -ldolfin
 mkoctfile oct2xml.cc -ldolfin
-
-Under Octave you can run the following example 
-for xml2oct with 
-
-mesh = xml2oct("dolfin_fine.xml.gz");
-msh2p_mesh(mesh);
-
-(the mesh dolfin has been taken
-from the Fenics website, author: A.Logg)
-
-Under Octave you can run the following example 
-for xml2oct with 
-
-mesh = msh2m_structured_mesh(linspace(0,1,10),linspace(0,1,20),1,[0 1 2 3]);
-oct2xml(mesh,"my_output_name");
 
 
 if you occur in this error:
