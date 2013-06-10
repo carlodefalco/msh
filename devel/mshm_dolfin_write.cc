@@ -18,18 +18,15 @@
 #include <octave/oct.h>
 #include <octave/oct-map.h>
 
-DEFUN_DLD (mshm_dolfin_write, args, ,
-"-*- texinfo -*-\n\
-@deftypefn {Function File}  @\n\
-mshm_dolfin_write(@var{mesh}, @var(_name) )\n\
-\n\
-Write a mesh stored in the (p,e,t) format to a .xml file compliant with dolfin.\n\
-\n\
+DEFUN_DLD (mshm_dolfin_write, args, ,"-*- texinfo -*-\n\
+@deftypefn {Function File}\
+mshm_dolfin_write (@var{mesh}, @var{mesh_name})\n\
+Write a mesh to a dolfin .xml file.\n\
 @itemize @bullet\n\
-@item @var{mesh} is the mesh you want to write: it should be a mesh stored in the (p,e,t) format \n\
-@item @var{output_name} is an optional value specifying the output name. \n\
+@item @var{mesh} is a PDE-tool like structure\n\
+with matrix fields (p,e,t).\n\
+@item The string @var{mesh_name} is an optional value specifying the output name.\n\
 @end itemize\n\
-\n\
 @seealso{msh3m_structured_mesh, msh2m_structured_mesh, mshm_dolfin_read}\n\
 @end deftypefn")
 {
@@ -37,88 +34,89 @@ Write a mesh stored in the (p,e,t) format to a .xml file compliant with dolfin.\
   octave_value_list retval;
 
   if (nargin < 1 || nargin > 2)
-    {
-      print_usage ();
-    }
+    print_usage ();
   else
     {
       Octave_map a (args(0).map_value ());
       if (! error_state)
-	{
-	  std::string output_mesh;
-	  (nargin == 2) ? (output_mesh = args(1).string_value ()) : (output_mesh = "mesh");
-	  if (! error_state)
-	    {
-	      Matrix p (a.contents (a.seek ("p"))(0).matrix_value ());
-	      Matrix t (a.contents (a.seek ("t"))(0).matrix_value ());
-	      if (! error_state)
-		{
-		  dolfin::Mesh mesh;
-		  std::size_t D = p.rows ();
-		  dolfin::MeshEditor editor;
-		  editor.open (mesh, D, D);
+        {
+          std::string output_mesh;
+          (nargin == 2) ? (output_mesh = args(1).string_value ()) : (output_mesh = "mesh");
+          if (! error_state)
+            {
+              Matrix p (a.contents (a.seek ("p"))(0).matrix_value ());
+              Matrix t (a.contents (a.seek ("t"))(0).matrix_value ());
+              if (! error_state)
+                {
+                  dolfin::Mesh mesh;
+                  std::size_t D = p.rows ();
 
-		  std::size_t num_v = p.cols ();
-		  editor.init_vertices (num_v);
+                  if (D < 2 || D > 3)
+                    error ("mshm_dolfin_write: only 2D or 3D meshes are supported");
+                  else
+                    {
+                      dolfin::MeshEditor editor;
+                      editor.open (mesh, D, D);
+                      editor.init_vertices (p.cols ());
+                      editor.init_cells (t.cols ());
 
-		  std::size_t num_c = t.cols ();
-		  editor.init_cells (num_c);
-
-		  if (D == 2)
-		    {
-		      for (uint i = 0; i < num_v; ++i)
-			editor.add_vertex (i, p(0,i), p(1,i));
+                      if (D == 2)
+                        {
+                          for (uint i = 0; i < p.cols (); ++i)
+                            editor.add_vertex (i, p.xelem (0, i), p.xelem (1, i));
       
-		      for (uint i = 0; i < num_c; ++i)
-			editor.add_cell (i, t(0,i)-1, t(1,i)-1, t(2,i)-1);
-		    }
+                          for (uint i = 0; i < t.cols (); ++i)
+                            editor.add_cell (i, t.xelem (0, i) - 1, t.xelem (1, i) - 1, t.xelem (2, i) - 1);
+                        }
 
-		  if (D == 3)
-		    {
-		      for (uint i = 0; i < num_v; ++i)
-			editor.add_vertex (i, p(0,i), p(1,i), p(2,i));
+                      if (D == 3)
+                        {
+                          for (uint i = 0; i < p.cols (); ++i)
+                            editor.add_vertex (i, p.xelem (0, i), p.xelem (1, i), p.xelem (2, i));
       
-		      for (uint i = 0; i < num_c; ++i)
-			editor.add_cell (i, t(0,i)-1, t(1,i)-1, t(2,i)-1, t(3,i)-1);
-		    }
+                          for (uint i = 0; i < t.cols (); ++i)
+                            editor.add_cell (i, t.xelem (0, i) - 1, t.xelem (1, i) - 1, t.xelem (2, i) - 1, t.xelem (3, i) - 1);
+                        }
 
-		  editor.close ();
+                      editor.close ();
 
-		  dolfin::File mesh_file (output_mesh + ".xml");
-		  mesh_file << mesh;
-		}
-	    }
-	}
+                      dolfin::File mesh_file (output_mesh + ".xml");
+                      mesh_file << mesh;
+                    }
+                }
+            }
+        }
     }
+
   return retval;
 }
 
 
 /*
 %!test
-%! x = y = z = linspace(0,1,2);
-%! msh = msh3m_structured_mesh(x,y,z,1,[1:6]);
-%! mshm_dolfin_write(msh, "msh");
-%! msh = mshm_dolfin_read("msh.xml");
-%! p =[ 0   0   1   1   0   0   1   1
-%!      0   1   0   1   0   1   0   1
-%!      0   0   0   0   1   1   1   1];
-%! assert(msh.p,p)
-%! t =[    1   3   1   2   3   3
+%! x = y = z = linspace (0, 1, 2);
+%! msh = msh3m_structured_mesh (x, y, z, 1, [1 : 6]);
+%! mshm_dolfin_write (msh, "msh");
+%! msh = mshm_dolfin_read ("msh.xml");
+%! p = [ 0   0   1   1   0   0   1   1
+%!       0   1   0   1   0   1   0   1
+%!       0   0   0   0   1   1   1   1];
+%! assert (msh.p, p)
+%! t = [   1   3   1   2   3   3
 %!         2   5   3   3   6   4
 %!         3   6   5   4   7   6
 %!         6   7   6   6   8   8
 %!         1   1   1   1   1   1];
-%! assert(msh.t,t)
-%! e =[1   1   5   3   1   1   2   2   6   3   4   3
-%!   2   2   6   5   5   3   4   3   7   7   6   4
-%!   6   3   7   7   6   5   6   4   8   8   8   8
-%!   0   0   0   0   0   0   0   0   0   0   0   0
-%!   0   0   0   0   0   0   0   0   0   0   0   0
-%!   0   0   0   0   0   0   0   0   0   0   0   0
-%!   0   0   0   0   0   0   0   0   0   0   0   0
-%!   0   0   0   0   0   0   0   0   0   0   0   0
-%!   0   0   0   0   0   0   0   0   0   0   0   0
-%!   1   1   1   1   1   1   1   1   1   1   1   1];
-%! assert(msh.e,e)
+%! assert (msh.t, t)
+%! e = [1   1   5   3   1   1   2   2   6   3   4   3
+%!      2   2   6   5   5   3   4   3   7   7   6   4
+%!      6   3   7   7   6   5   6   4   8   8   8   8
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0];
+%! assert (msh.e, e)
 */
