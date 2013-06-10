@@ -44,8 +44,8 @@ with matrix fields (p,e,t).\n\
           (nargin == 2) ? (output_mesh = args(1).string_value ()) : (output_mesh = "mesh");
           if (! error_state)
             {
-              Array<octave_idx_type> p (a.contents (a.seek ("p"))(0).matrix_value ());
-              Array<octave_idx_type> t (a.contents (a.seek ("t"))(0).matrix_value ());
+              Matrix p (a.contents (a.seek ("p"))(0).matrix_value ());
+              Matrix t (a.contents (a.seek ("t"))(0).matrix_value ());
               if (! error_state)
                 {
                   dolfin::Mesh mesh;
