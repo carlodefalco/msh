@@ -18,9 +18,9 @@
 #include <dolfin.h>
 #include <octave/oct.h>
 #include <octave/oct-map.h>
+#include <algorithm>
 
-DEFUN_DLD (mshm_dolfin_read, args, ,
-"-*- texinfo -*-\n\
+DEFUN_DLD (mshm_dolfin_read, args, ,"-*- texinfo -*-\n\
 @deftypefn {Function File} {[@var{mesh}]} = \
 mshm_dolfin_read (@var{mesh_to_read}) \n\
 Read a mesh from a dolfin .xml.gz file.\n\
@@ -33,6 +33,8 @@ with matrix fields (p,e,t).\n\
 {
   int nargin = args.length ();
   octave_value_list retval;
+  dim_vector dims;
+  dims.resize (2);
 
   if (nargin != 1)
     print_usage ();
@@ -43,69 +45,63 @@ with matrix fields (p,e,t).\n\
 	{
 	  dolfin::Mesh mesh (mesh_to_read);
 	  uint D = mesh.topology ().dim ();
+          if (D < 2 || D > 3)
+            error ("mshm_dolfin_read: only 2D or 3D meshes are supported");
+          else
+            {
+              std::size_t num_v = mesh.num_vertices ();
+              Matrix p (D, num_v);
+              std::copy (mesh.coordinates ().begin (),
+                         mesh.coordinates ().end (),
+                         p.fortran_vec ());
+                
+              mesh.init (D - 1, D);
+              std::size_t num_f = mesh.num_facets ();
+                
+              // e has 7 rows in 2d, 10 rows in 3d
+              dims(0) = D == 2 ? 7 : 10; 
+              dims(1) = num_f;
+              Array<octave_idx_type> e (dims, 0);
+              octave_idx_type *evec = e.fortran_vec ();
 
-	  std::size_t num_v = mesh.num_vertices ();
-	  Matrix p (D, num_v);
-	  std::vector<double> my_coord = mesh.coordinates (); 
-	  std::size_t n = 0;
+              octave_idx_type l = 0, m = 0;
+                
+              for (dolfin::FacetIterator f (mesh); ! f.end (); ++f)
+                {
+                  if ((*f).exterior () == true)
+                    {
+                      l = 0;
+                      for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l) 
+                        e.xelem (l, m) = (*v).index () + 1 ;
+                      ++m;
+                    }   
+                }
 
-	  for (octave_idx_type j=0; j < num_v; ++j)
-	    for (octave_idx_type i =0; i < D; ++i, ++n)
-	      p(i,j) = my_coord[n];
+              dims(1) = m;
+              e.resize (dims);
+              
+              for (octave_idx_type j = e.rows () - 2; 
+                   j < e.numel () - 2; j += e.rows ())
+                evec[j] = 1;
+  	  
+              dims(0) = D + 2;
+              dims(1) =  mesh.num_cells ();
+              Array<octave_idx_type> t (dims, 1);
 
-	  mesh.init (D - 1, D);
-	  std::size_t num_f = mesh.num_facets ();
-	  Matrix e;
+              std::vector<unsigned int> my_cells = mesh.cells ();
+              std::size_t n = 0;
 
-	  if (D == 2)
-	    e.resize (7, num_f);
+              for (octave_idx_type j = 0; j < t.cols (); ++j)
+                for (octave_idx_type i = 0; i < D + 1; ++i, ++n)
+                  t.xelem (i, j) += my_cells[n]; 
 
-	  if (D == 3)
-	    e.resize (10, num_f);
-
-	  octave_idx_type l = 0;
-	  octave_idx_type m = 0;
-
-	  for (dolfin::FacetIterator f (mesh); ! f.end (); ++f)
-	    {
-	      if ((*f).exterior () == true)
-		{
-		  l = 0;
-		  for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l) 
-                    e(l, m) = (*v).index () + 1 ;
-		  ++m;
-		}   
-	    }
-
-	  if (D == 2) 
-	    {
-	      e.resize (7, m);
-	      e.fill (1, 6, 0, 6, m - 1);
-	    }
-
-	  if (D == 3) 
-	    {
-	      e.resize (10, m);
-	      e.fill (1, 9, 0, 9, m - 1);
-	    }
-  
-	  
-	  std::size_t num_c = mesh.num_cells ();
-	  Matrix t (D+2, num_c);
-	  t.fill (1.0);
-	  std::vector<unsigned int> my_cells = mesh.cells ();
-	  n = 0;
-
-	  for (octave_idx_type j=0; j < num_c; ++j)
-	    for (octave_idx_type i =0; i < D+1; ++i,++n)
-	      t(i,j) += my_cells[n]; 
-
-	  Octave_map a;
-	  a.assign ("p", p);
-	  a.assign ("e", e);
-	  a.assign ("t", t);
-	  retval = octave_value (a);
-	}
+              Octave_map a;
+              a.assign ("p", p);
+              a.assign ("e", e);
+              a.assign ("t", t);
+              retval = octave_value (a);
+            }
+        }
     }
 
   return retval;
