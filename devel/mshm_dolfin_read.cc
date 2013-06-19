@@ -49,51 +49,70 @@ with matrix fields (p,e,t).\n\
             error ("mshm_dolfin_read: only 2D or 3D meshes are supported");
           else
             {
+              // matrix p
               std::size_t num_v = mesh.num_vertices ();
               Matrix p (D, num_v);
               std::copy (mesh.coordinates ().begin (),
                          mesh.coordinates ().end (),
                          p.fortran_vec ());
-                
+
+              // e has 7 rows in 2d, 10 rows in 3d
               mesh.init (D - 1, D);
               std::size_t num_f = mesh.num_facets ();
-                
-              // e has 7 rows in 2d, 10 rows in 3d
               dims(0) = D == 2 ? 7 : 10; 
               dims(1) = num_f;
               Array<octave_idx_type> e (dims, 0);
               octave_idx_type *evec = e.fortran_vec ();
-
+              uint D2 = D * D;
               octave_idx_type l = 0, m = 0;
-                
+
+              dolfin::MeshFunction <uint> facet_domains;
+              if (! mesh.domains ().is_empty ())
+                  if (mesh.domains ().num_marked (D-1) != 0)
+                    facet_domains = * (mesh.domains ().facet_domains ());
+
               for (dolfin::FacetIterator f (mesh); ! f.end (); ++f)
                 {
                   if ((*f).exterior () == true)
                     {
                       l = 0;
                       for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l) 
-                        e.xelem (l, m) = (*v).index () + 1 ;
+                        e.xelem (l, m) = (*v).index () + 1;
+
+                      if (! facet_domains.empty ())
+                        e.xelem (D2, m) = facet_domains[*f];
+
                       ++m;
-                    }   
+                    }
                 }
 
               dims(1) = m;
               e.resize (dims);
-              
+
               for (octave_idx_type j = e.rows () - 2; 
                    j < e.numel () - 2; j += e.rows ())
                 evec[j] = 1;
-  	  
-              dims(0) = D + 2;
-              dims(1) =  mesh.num_cells ();
-              Array<octave_idx_type> t (dims, 1);
 
+              // t matrix
+              dims(0) = D + 2;
+              dims(1) = mesh.num_cells ();
+              Array<octave_idx_type> t (dims, 1);
               std::vector<unsigned int> my_cells = mesh.cells ();
               std::size_t n = 0;
 
+              dolfin::MeshFunction<uint> cell_domains;
+              if (! mesh.domains ().is_empty ())
+                  if (mesh.domains ().num_marked (D) != 0)
+	            cell_domains = * (mesh.domains ().cell_domains ());
+
               for (octave_idx_type j = 0; j < t.cols (); ++j)
-                for (octave_idx_type i = 0; i < D + 1; ++i, ++n)
-                  t.xelem (i, j) += my_cells[n]; 
+                {
+                  for (octave_idx_type i = 0; i < D + 1; ++i, ++n)
+                    t.xelem (i, j) += my_cells[n];
+
+                   if (! cell_domains.empty ())
+                     t.xelem (D + 1, j) = cell_domains[j];
+                }
 
               Octave_map a;
               a.assign ("p", p);
@@ -110,6 +129,6 @@ with matrix fields (p,e,t).\n\
 
 /*
 %!demo
-%! mesh = mshm_dolfin_read ("dolfin_fine.xml.gz" );
-%! msh2p_mesh(mesh);
+%! mesh = mshm_dolfin_read ("dolfin_fine.xml.gz");
+%! msh2p_mesh (mesh);
 */
