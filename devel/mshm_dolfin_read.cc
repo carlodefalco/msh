@@ -114,10 +114,10 @@ with matrix fields (p,e,t).\n\
                      t.xelem (D + 1, j) = cell_domains[j];
                 }
 
-              Octave_map a;
-              a.assign ("p", p);
-              a.assign ("e", e);
-              a.assign ("t", t);
+              octave_scalar_map a;
+              a.setfield ("p", p);
+              a.setfield ("e", e);
+              a.setfield ("t", t);
               retval = octave_value (a);
             }
         }

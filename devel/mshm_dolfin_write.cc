@@ -37,55 +37,56 @@ with matrix fields (p,e,t).\n\
     print_usage ();
   else
     {
-      Octave_map a (args(0).map_value ());
+      octave_map a = args(0).scalar_map_value ();      
+      std::string output_mesh;
+
+      output_mesh = "mesh";
+      if (nargin == 2) 
+        output_mesh = args(1).string_value ();
+
+      Array<double> p = a.seek ("p").matrix_value ();
+      Array<octave_idx_type> t = a.seek ("t").matrix_value ();
       if (! error_state)
         {
-          std::string output_mesh;
-          (nargin == 2) ? (output_mesh = args(1).string_value ()) : (output_mesh = "mesh");
-          if (! error_state)
+          dolfin::Mesh mesh;
+          std::size_t D = p.rows ();
+              
+          if (D < 2 || D > 3)
+            error ("mshm_dolfin_write: only 2D or 3D meshes are supported");
+          else
             {
-              Array<double> p (a.contents (a.seek ("p"))(0).matrix_value ());
-              Array<octave_idx_type> t (a.contents (a.seek ("t"))(0).matrix_value ());
-              if (! error_state)
+              dolfin::MeshEditor editor;
+              editor.open (mesh, D, D);
+              editor.init_vertices (p.cols ());
+              editor.init_cells (t.cols ());
+                  
+              if (D == 2)
                 {
-                  dolfin::Mesh mesh;
-                  std::size_t D = p.rows ();
-
-                  if (D < 2 || D > 3)
-                    error ("mshm_dolfin_write: only 2D or 3D meshes are supported");
-                  else
-                    {
-                      dolfin::MeshEditor editor;
-                      editor.open (mesh, D, D);
-                      editor.init_vertices (p.cols ());
-                      editor.init_cells (t.cols ());
-
-                      if (D == 2)
-                        {
-                          for (uint i = 0; i < p.cols (); ++i)
-                            editor.add_vertex (i, p.xelem (0, i), p.xelem (1, i));
-      
-                          for (uint i = 0; i < t.cols (); ++i)
-                            editor.add_cell (i, t.xelem (0, i) - 1, t.xelem (1, i) - 1, t.xelem (2, i) - 1);
-                        }
-
-                      if (D == 3)
-                        {
-                          for (uint i = 0; i < p.cols (); ++i)
-                            editor.add_vertex (i, p.xelem (0, i), p.xelem (1, i), p.xelem (2, i));
-      
-                          for (uint i = 0; i < t.cols (); ++i)
-                            editor.add_cell (i, t.xelem (0, i) - 1, t.xelem (1, i) - 1, t.xelem (2, i) - 1, t.xelem (3, i) - 1);
-                        }
-
-                      editor.close ();
-
-                      dolfin::File mesh_file (output_mesh + ".xml");
-                      mesh_file << mesh;
-                    }
+                  for (uint i = 0; i < p.cols (); ++i)
+                    editor.add_vertex (i, p.xelem (0, i), p.xelem (1, i));
+                      
+                  for (uint i = 0; i < t.cols (); ++i)
+                    editor.add_cell (i, t.xelem (0, i) - 1, 
+                                     t.xelem (1, i) - 1, t.xelem (2, i) - 1);
                 }
+                  
+              if (D == 3)
+                {
+                  for (uint i = 0; i < p.cols (); ++i)
+                    editor.add_vertex (i, p.xelem (0, i),
+                                       p.xelem (1, i), p.xelem (2, i));
+                      
+                  for (uint i = 0; i < t.cols (); ++i)
+                    editor.add_cell (i, t.xelem (0, i) - 1, t.xelem (1, i) - 1, 
+                                     t.xelem (2, i) - 1, t.xelem (3, i) - 1);
+                }
+              
+              editor.close ();
+              
+              dolfin::File mesh_file (output_mesh + ".xml");
+              mesh_file << mesh;
             }
-        }
+        }              
     }
 
   return retval;
