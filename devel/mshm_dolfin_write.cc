@@ -37,16 +37,16 @@ with matrix fields (p,e,t).\n\
     print_usage ();
   else
     {
-      octave_map a = args(0).scalar_map_value ();      
+      octave_scalar_map a = args(0).scalar_map_value ();      
       std::string output_mesh;
 
       output_mesh = "mesh";
       if (nargin == 2) 
         output_mesh = args(1).string_value ();
 
-      Array<double> p = a.contents ("p")(0).matrix_value ();
-      Array<octave_idx_type> t = a.contents ("t")(0).matrix_value ();
-      Array<octave_idx_type> e = a.contents ("e")(0).matrix_value ();
+      Array<double> p = a.contents ("p").matrix_value ();
+      Array<octave_idx_type> t = a.contents ("t").matrix_value ();
+      Array<octave_idx_type> e = a.contents ("e").matrix_value ();
       if (! error_state)
         {
           dolfin::Mesh mesh;
@@ -191,7 +191,7 @@ with matrix fields (p,e,t).\n\
                       dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
                       for (dolfin::CellIterator f (v); ! f.end (); ++f)
                         {
-                          if ( (*f).entities(0)[0] == t.xelem (0, i) - 1 
+                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1 
                                && (*f).entities(0)[1] == t.xelem (1, i) - 1 
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (3, i) - 1
