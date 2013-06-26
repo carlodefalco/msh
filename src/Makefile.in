@@ -1,13 +1,16 @@
-MKOCTFILE ?= mkoctfile -Wall
+MKOCTFILE ?= mkoctfile
 
 OCTFILES=mshm_refine.oct mshm_dolfin_read.oct mshm_dolfin_write.oct
 
-CFLAGS      = @DEFS@
+HAVE_DOLFIN_H = @HAVE_DOLFIN_H@
+ifdef HAVE_DOLFIN_H
+  CPPFLAGS += -DHAVE_DOLFIN_H
+endif
 
 all: $(OCTFILES)
 
 %.oct:  %.cc
-	$(MKOCTFILE) $(CFLAGS) $< -ldolfin
+	$(MKOCTFILE) $(CPPFLAGS) $< -ldolfin
 
 clean:
 	-rm -f *.o core octave-core *.oct *~
