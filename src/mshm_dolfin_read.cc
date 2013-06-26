@@ -70,7 +70,7 @@ with matrix fields (p,e,t).\n\
               uint D2 = D * D;
               octave_idx_type l = 0, m = 0;
 
-              dolfin::MeshFunction <uint> facet_domains;
+              dolfin::MeshFunction <long unsigned int> facet_domains;
               if (! mesh.domains ().is_empty ())
                   if (mesh.domains ().num_marked (D-1) != 0)
                     facet_domains = * (mesh.domains ().facet_domains ());
@@ -104,7 +104,7 @@ with matrix fields (p,e,t).\n\
               std::vector<unsigned int> my_cells = mesh.cells ();
               std::size_t n = 0;
 
-              dolfin::MeshFunction<uint> cell_domains;
+              dolfin::MeshFunction<long unsigned int> cell_domains;
               if (! mesh.domains ().is_empty ())
                   if (mesh.domains ().num_marked (D) != 0)
                     cell_domains = * (mesh.domains ().cell_domains ());

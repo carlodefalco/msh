@@ -91,7 +91,7 @@ with matrix fields (p,e,t).\n\
 
               // store information associated with e
               mesh.init (D - 1);
-              dolfin::MeshValueCollection<uint> facet (D - 1);
+              dolfin::MeshValueCollection<long unsigned int> facet (D - 1);
               std::size_t num_side_edges = e.cols ();
 
               if (D == 2)
@@ -151,7 +151,7 @@ with matrix fields (p,e,t).\n\
               *(mesh.domains ().markers (D - 1)) = facet;
 
               // store information associated with t
-              dolfin::MeshValueCollection<uint> cell (D);
+              dolfin::MeshValueCollection<long unsigned int> cell (D);
               std::size_t num_cells = t.cols ();
 
               if (D == 2)
