@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Marco Vassallo
-  
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -14,7 +14,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef HAVE_DOLFIN_H
 #include <dolfin.h>
+#endif
 #include <octave/oct.h>
 #include <octave/oct-map.h>
 
@@ -35,6 +37,9 @@ the same structure as @var{mesh}\n\
 {
   int nargin = args.length ();
   octave_value_list retval;
+#ifndef HAVE_DOLFIN_H
+  error("mshm_refine: the msh package was built without support for dolfin (dolfin.h required)");
+#else
   dim_vector dims;
   dims.resize (2);
 
@@ -55,7 +60,7 @@ the same structure as @var{mesh}\n\
         {
           dolfin::Mesh mesh;
           std::size_t D = p.rows ();
-              
+
           if (D < 2 || D > 3)
             error ("mshm_dolfin_write: only 2D or 3D meshes are supported");
           else
@@ -71,7 +76,7 @@ the same structure as @var{mesh}\n\
                     editor.add_vertex (i, p.xelem (0, i), p.xelem (1, i));
 
                   for (uint i = 0; i < t.cols (); ++i)
-                    editor.add_cell (i, t.xelem (0, i) - 1, 
+                    editor.add_cell (i, t.xelem (0, i) - 1,
                                      t.xelem (1, i) - 1, t.xelem (2, i) - 1);
                 }
 
@@ -158,11 +163,11 @@ the same structure as @var{mesh}\n\
                       dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
                       for (dolfin::CellIterator f (v); ! f.end (); ++f)
                         {
-                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1 
-                              && (*f).entities(0)[1] == t.xelem (1, i) - 1 
+                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1
+                              && (*f).entities(0)[1] == t.xelem (1, i) - 1
                               && (*f).entities(0)[2] == t.xelem (2, i) - 1
-                              || (*f).entities(0)[0] == t.xelem (0, i) - 1 
-                              && (*f).entities(0)[1] == t.xelem (2, i) - 1 
+                              || (*f).entities(0)[0] == t.xelem (0, i) - 1
+                              && (*f).entities(0)[1] == t.xelem (2, i) - 1
                               && (*f).entities(0)[2] == t.xelem (1, i) - 1
                               || (*f).entities(0)[0] == t.xelem (1, i) - 1
                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
@@ -191,12 +196,12 @@ the same structure as @var{mesh}\n\
                       dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
                       for (dolfin::CellIterator f (v); ! f.end (); ++f)
                         {
-                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (1, i) - 1 
+                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (1, i) - 1
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (3, i) - 1
-                               || (*f).entities(0)[0] == t.xelem (0, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (1, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (0, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (1, i) - 1
                                && (*f).entities(0)[2] == t.xelem (3, i) - 1
                                && (*f).entities(0)[3] == t.xelem (2, i) - 1
                                || (*f).entities(0)[0] == t.xelem (0, i) - 1
@@ -216,12 +221,12 @@ the same structure as @var{mesh}\n\
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (1, i) - 1
 
-                               || (*f).entities(0)[0] == t.xelem (1, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (1, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (3, i) - 1
-                               || (*f).entities(0)[0] == t.xelem (1, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (1, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (3, i) - 1
                                && (*f).entities(0)[3] == t.xelem (2, i) - 1
                                || (*f).entities(0)[0] == t.xelem (1, i) - 1
@@ -241,12 +246,12 @@ the same structure as @var{mesh}\n\
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (0, i) - 1
 
-                               || (*f).entities(0)[0] == t.xelem (2, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (2, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (1, i) - 1
                                && (*f).entities(0)[3] == t.xelem (3, i) - 1
-                               || (*f).entities(0)[0] == t.xelem (2, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (2, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (3, i) - 1
                                && (*f).entities(0)[3] == t.xelem (1, i) - 1
                                || (*f).entities(0)[0] == t.xelem (2, i) - 1
@@ -266,12 +271,12 @@ the same structure as @var{mesh}\n\
                                && (*f).entities(0)[2] == t.xelem (1, i) - 1
                                && (*f).entities(0)[3] == t.xelem (0, i) - 1
 
-                               || (*f).entities(0)[0] == t.xelem (3, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (3, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (1, i) - 1
                                && (*f).entities(0)[3] == t.xelem (2, i) - 1
-                               || (*f).entities(0)[0] == t.xelem (3, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (3, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (1, i) - 1
                                || (*f).entities(0)[0] == t.xelem (3, i) - 1
@@ -300,7 +305,7 @@ the same structure as @var{mesh}\n\
 
               *(mesh.domains ().markers (D)) = cell;
 
-              dolfin::CellFunction<bool> cell_markers (mesh);         
+              dolfin::CellFunction<bool> cell_markers (mesh);
               if (nargin == 2)
                 {
                   cell_markers.set_all (false);
@@ -340,7 +345,7 @@ the same structure as @var{mesh}\n\
                   if ((*f).exterior () == true)
                     {
                        l = 0;
-                       for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l) 
+                       for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l)
                          e.xelem (l, m) = (*v).index () + 1 ;
 
                        e.xelem (D2, m) = r_facet[*f];
@@ -351,7 +356,7 @@ the same structure as @var{mesh}\n\
               dims(1) = m;
               e.resize (dims);
 
-              for (octave_idx_type j = e.rows () - 2; 
+              for (octave_idx_type j = e.rows () - 2;
                    j < e.numel () - 2; j += e.rows ())
                 evec[j] = 1;
 
@@ -369,7 +374,7 @@ the same structure as @var{mesh}\n\
                 {
                   for (octave_idx_type i = 0; i < D + 1; ++i, ++n)
                     t.xelem (i, j) += my_cells[n];
- 
+
                   t.xelem (D + 1, j) = r_cell[j];
                 }
 
@@ -381,7 +386,7 @@ the same structure as @var{mesh}\n\
             }
         }
     }
-
+#endif
   return retval;
 }
 

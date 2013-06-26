@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Marco Vassallo
-  
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -14,8 +14,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
+#ifdef HAVE_DOLFIN_H
 #include <dolfin.h>
+#endif
 #include <octave/oct.h>
 #include <octave/oct-map.h>
 #include <algorithm>
@@ -31,8 +32,11 @@ with matrix fields (p,e,t).\n\
 @seealso{msh3m_structured_mesh, msh2m_structured_mesh, mshm_dolfin_write}\n\
 @end deftypefn")
 {
-  int nargin = args.length ();
   octave_value_list retval;
+#ifndef HAVE_DOLFIN_H
+  error("mshm_dolfin_read: the msh package was built without support for dolfin (dolfin.h required)");
+#else
+  int nargin = args.length ();
   dim_vector dims;
   dims.resize (2);
 
@@ -42,9 +46,9 @@ with matrix fields (p,e,t).\n\
     {
       std::string mesh_to_read = args(0).string_value ();
       if (! error_state)
-	{
-	  dolfin::Mesh mesh (mesh_to_read);
-	  uint D = mesh.topology ().dim ();
+        {
+          dolfin::Mesh mesh (mesh_to_read);
+          uint D = mesh.topology ().dim ();
           if (D < 2 || D > 3)
             error ("mshm_dolfin_read: only 2D or 3D meshes are supported");
           else
@@ -59,7 +63,7 @@ with matrix fields (p,e,t).\n\
               // e has 7 rows in 2d, 10 rows in 3d
               mesh.init (D - 1, D);
               std::size_t num_f = mesh.num_facets ();
-              dims(0) = D == 2 ? 7 : 10; 
+              dims(0) = D == 2 ? 7 : 10;
               dims(1) = num_f;
               Array<octave_idx_type> e (dims, 0);
               octave_idx_type *evec = e.fortran_vec ();
@@ -76,7 +80,7 @@ with matrix fields (p,e,t).\n\
                   if ((*f).exterior () == true)
                     {
                       l = 0;
-                      for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l) 
+                      for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l)
                         e.xelem (l, m) = (*v).index () + 1;
 
                       if (! facet_domains.empty ())
@@ -89,7 +93,7 @@ with matrix fields (p,e,t).\n\
               dims(1) = m;
               e.resize (dims);
 
-              for (octave_idx_type j = e.rows () - 2; 
+              for (octave_idx_type j = e.rows () - 2;
                    j < e.numel () - 2; j += e.rows ())
                 evec[j] = 1;
 
@@ -103,7 +107,7 @@ with matrix fields (p,e,t).\n\
               dolfin::MeshFunction<uint> cell_domains;
               if (! mesh.domains ().is_empty ())
                   if (mesh.domains ().num_marked (D) != 0)
-	            cell_domains = * (mesh.domains ().cell_domains ());
+                    cell_domains = * (mesh.domains ().cell_domains ());
 
               for (octave_idx_type j = 0; j < t.cols (); ++j)
                 {
@@ -122,7 +126,7 @@ with matrix fields (p,e,t).\n\
             }
         }
     }
-
+#endif
   return retval;
 }
 

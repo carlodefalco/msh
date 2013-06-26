@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 Marco Vassallo
-  
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -14,7 +14,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef HAVE_DOLFIN_H
 #include <dolfin.h>
+#endif
 #include <octave/oct.h>
 #include <octave/oct-map.h>
 
@@ -32,16 +34,19 @@ with matrix fields (p,e,t).\n\
 {
   int nargin = args.length ();
   octave_value_list retval;
+#ifndef HAVE_DOLFIN_H
+  error("mshm_dolfn_write: the msh package was built without support for dolfin (dolfin.h required)");
+#else
 
   if (nargin < 1 || nargin > 2)
     print_usage ();
   else
     {
-      octave_scalar_map a = args(0).scalar_map_value ();      
+      octave_scalar_map a = args(0).scalar_map_value ();
       std::string output_mesh;
 
       output_mesh = "mesh";
-      if (nargin == 2) 
+      if (nargin == 2)
         output_mesh = args(1).string_value ();
 
       Array<double> p = a.contents ("p").matrix_value ();
@@ -51,7 +56,7 @@ with matrix fields (p,e,t).\n\
         {
           dolfin::Mesh mesh;
           std::size_t D = p.rows ();
-              
+
           if (D < 2 || D > 3)
             error ("mshm_dolfin_write: only 2D or 3D meshes are supported");
           else
@@ -67,7 +72,7 @@ with matrix fields (p,e,t).\n\
                     editor.add_vertex (i, p.xelem (0, i), p.xelem (1, i));
 
                   for (uint i = 0; i < t.cols (); ++i)
-                    editor.add_cell (i, t.xelem (0, i) - 1, 
+                    editor.add_cell (i, t.xelem (0, i) - 1,
                                      t.xelem (1, i) - 1, t.xelem (2, i) - 1);
                 }
 
@@ -156,11 +161,11 @@ with matrix fields (p,e,t).\n\
                       dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
                       for (dolfin::CellIterator f (v); ! f.end (); ++f)
                         {
-                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1 
-                              && (*f).entities(0)[1] == t.xelem (1, i) - 1 
+                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1
+                              && (*f).entities(0)[1] == t.xelem (1, i) - 1
                               && (*f).entities(0)[2] == t.xelem (2, i) - 1
-                              || (*f).entities(0)[0] == t.xelem (0, i) - 1 
-                              && (*f).entities(0)[1] == t.xelem (2, i) - 1 
+                              || (*f).entities(0)[0] == t.xelem (0, i) - 1
+                              && (*f).entities(0)[1] == t.xelem (2, i) - 1
                               && (*f).entities(0)[2] == t.xelem (1, i) - 1
                               || (*f).entities(0)[0] == t.xelem (1, i) - 1
                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
@@ -191,12 +196,12 @@ with matrix fields (p,e,t).\n\
                       dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
                       for (dolfin::CellIterator f (v); ! f.end (); ++f)
                         {
-                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (1, i) - 1 
+                          if ((*f).entities(0)[0] == t.xelem (0, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (1, i) - 1
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (3, i) - 1
-                               || (*f).entities(0)[0] == t.xelem (0, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (1, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (0, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (1, i) - 1
                                && (*f).entities(0)[2] == t.xelem (3, i) - 1
                                && (*f).entities(0)[3] == t.xelem (2, i) - 1
                                || (*f).entities(0)[0] == t.xelem (0, i) - 1
@@ -216,12 +221,12 @@ with matrix fields (p,e,t).\n\
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (1, i) - 1
 
-                               || (*f).entities(0)[0] == t.xelem (1, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (1, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (3, i) - 1
-                               || (*f).entities(0)[0] == t.xelem (1, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (1, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (3, i) - 1
                                && (*f).entities(0)[3] == t.xelem (2, i) - 1
                                || (*f).entities(0)[0] == t.xelem (1, i) - 1
@@ -241,12 +246,12 @@ with matrix fields (p,e,t).\n\
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (0, i) - 1
 
-                               || (*f).entities(0)[0] == t.xelem (2, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (2, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (1, i) - 1
                                && (*f).entities(0)[3] == t.xelem (3, i) - 1
-                               || (*f).entities(0)[0] == t.xelem (2, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (2, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (3, i) - 1
                                && (*f).entities(0)[3] == t.xelem (1, i) - 1
                                || (*f).entities(0)[0] == t.xelem (2, i) - 1
@@ -266,12 +271,12 @@ with matrix fields (p,e,t).\n\
                                && (*f).entities(0)[2] == t.xelem (1, i) - 1
                                && (*f).entities(0)[3] == t.xelem (0, i) - 1
 
-                               || (*f).entities(0)[0] == t.xelem (3, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (3, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (1, i) - 1
                                && (*f).entities(0)[3] == t.xelem (2, i) - 1
-                               || (*f).entities(0)[0] == t.xelem (3, i) - 1 
-                               && (*f).entities(0)[1] == t.xelem (0, i) - 1 
+                               || (*f).entities(0)[0] == t.xelem (3, i) - 1
+                               && (*f).entities(0)[1] == t.xelem (0, i) - 1
                                && (*f).entities(0)[2] == t.xelem (2, i) - 1
                                && (*f).entities(0)[3] == t.xelem (1, i) - 1
                                || (*f).entities(0)[0] == t.xelem (3, i) - 1
@@ -303,9 +308,9 @@ with matrix fields (p,e,t).\n\
               dolfin::File mesh_file (output_mesh + ".xml");
               mesh_file << mesh;
             }
-        }              
+        }
     }
-
+#endif
   return retval;
 }
 
