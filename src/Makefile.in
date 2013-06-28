@@ -13,5 +13,5 @@ all: $(OCTFILES)
 	$(MKOCTFILE) $(CPPFLAGS) $< -ldolfin
 
 clean:
-	-rm -f *.o core octave-core *.oct *~
+	-rm -f *.o core octave-core *.oct *~ *.xml
 

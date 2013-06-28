@@ -62,7 +62,7 @@ the same structure as @var{mesh}\n\
           std::size_t D = p.rows ();
 
           if (D < 2 || D > 3)
-            error ("mshm_dolfin_write: only 2D or 3D meshes are supported");
+            error ("mshm_refine: only 2D or 3D meshes are supported");
           else
             {
               dolfin::MeshEditor editor;
@@ -95,7 +95,7 @@ the same structure as @var{mesh}\n\
 
               // store information associated with e
               mesh.init (D - 1);
-              dolfin::MeshFunction<long unsigned int> facet (mesh, D - 1);
+              dolfin::MeshFunction<std::size_t> facet (mesh, D - 1);
               std::size_t num_side_edges = e.cols ();
 
               if (D == 2)
@@ -153,7 +153,7 @@ the same structure as @var{mesh}\n\
               *(mesh.domains ().markers (D - 1)) = facet;
 
               // store information associated with t
-              dolfin::MeshFunction<long unsigned int> cell (mesh, D);
+              dolfin::MeshFunction<std::size_t> cell (mesh, D);
               std::size_t num_cells = t.cols ();
 
               if (D == 2)
@@ -337,7 +337,7 @@ the same structure as @var{mesh}\n\
               uint D2 = D * D;
               octave_idx_type l = 0, m = 0;
 
-              dolfin::MeshFunction<long unsigned int> r_facet (*r_mesh, D - 1);
+              dolfin::MeshFunction<std::size_t> r_facet (*r_mesh, D - 1);
               r_facet = dolfin::adapt (facet, r_mesh);
 
               for (dolfin::FacetIterator f (*r_mesh); ! f.end (); ++f)
@@ -367,7 +367,7 @@ the same structure as @var{mesh}\n\
               std::vector<unsigned int> my_cells = (*r_mesh).cells ();
               std::size_t n = 0;
 
-              dolfin::MeshFunction<long unsigned int> r_cell (*r_mesh, D);
+              dolfin::MeshFunction<std::size_t> r_cell (*r_mesh, D);
               r_cell = dolfin::adapt (cell, r_mesh);
 
               for (octave_idx_type j = 0; j < t.cols (); ++j)

@@ -70,7 +70,7 @@ with matrix fields (p,e,t).\n\
               uint D2 = D * D;
               octave_idx_type l = 0, m = 0;
 
-              dolfin::MeshFunction <long unsigned int> facet_domains;
+              dolfin::MeshFunction <std::size_t> facet_domains;
               if (! mesh.domains ().is_empty ())
                   if (mesh.domains ().num_marked (D-1) != 0)
                     facet_domains = * (mesh.domains ().facet_domains ());
@@ -104,7 +104,7 @@ with matrix fields (p,e,t).\n\
               std::vector<unsigned int> my_cells = mesh.cells ();
               std::size_t n = 0;
 
-              dolfin::MeshFunction<long unsigned int> cell_domains;
+              dolfin::MeshFunction<std::size_t> cell_domains;
               if (! mesh.domains ().is_empty ())
                   if (mesh.domains ().num_marked (D) != 0)
                     cell_domains = * (mesh.domains ().cell_domains ());
@@ -132,7 +132,30 @@ with matrix fields (p,e,t).\n\
 
 
 /*
-%!demo
-%! mesh = mshm_dolfin_read ("dolfin_fine.xml.gz");
-%! msh2p_mesh (mesh);
+%!test
+%! x = y = z = linspace (0, 1, 2);
+%! msh = msh3m_structured_mesh (x, y, z, 1, [1 : 6]);
+%! mshm_dolfin_write (msh, "msh");
+%! msh = mshm_dolfin_read ("msh.xml");
+%! p = [ 0   0   1   1   0   0   1   1
+%!       0   1   0   1   0   1   0   1
+%!       0   0   0   0   1   1   1   1];
+%! assert (msh.p, p)
+%! t = [   1   3   1   2   3   3
+%!         2   5   3   3   6   4
+%!         3   6   5   4   7   6
+%!         6   7   6   6   8   8
+%!         1   1   1   1   1   1];
+%! assert (msh.t, t)
+%! e = [1   1   5   3   1   1   2   2   6   3   4   3
+%!      2   2   6   5   5   3   4   3   7   7   6   4
+%!      6   3   7   7   6   5   6   4   8   8   8   8
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      0   0   0   0   0   0   0   0   0   0   0   0
+%!      1   5   6   3   1   3   4   5   6   2   4   2];
+%! assert (msh.e, e)
 */
