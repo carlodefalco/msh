@@ -19,9 +19,13 @@ Mesh adaptation
   msh2m_equalize_mesh
   msh2m_displacement_smoothing
   msh2m_jiggle_mesh
+  mshm_refine
 Mesh extraction
   msh3e_surface_mesh
   msh2m_submesh
   msh3m_submesh
 Mesh plotting
   msh2p_mesh
+Mesh conversion from DOLFIN
+  mshm_dolfin_read
+  mshm_dolfin_write
