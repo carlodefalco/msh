@@ -69,7 +69,7 @@ the same structure as @var{mesh}\n\
                                         cell_idx.fortran_vec ()
                                         + cell_idx.length ());
 
-           if (nargin == 2 && ( min < 1 || max > t.cols ()))
+           if (nargin == 2 && (min < 1 || max > t.cols ()))
              error ("mshm_refine: cell index out of bounds");
           else
             {
