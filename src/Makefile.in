@@ -10,7 +10,7 @@ endif
 all: $(OCTFILES)
 
 %.oct:  %.cc
-	$(MKOCTFILE) $(CPPFLAGS) $< -ldolfin
+	$(MKOCTFILE) $(CPPFLAGS) $< $(LDFLAGS) -ldolfin
 
 clean:
 	-rm -f *.o core octave-core *.oct *~ *.xml
