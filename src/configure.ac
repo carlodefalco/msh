@@ -9,8 +9,10 @@ if [test $HAVE_MKOCTFILE = "no"]; then
   AC_MSG_ERROR([mkoctfile required to install $PACKAGE_NAME])
 fi
 
-AC_CHECK_HEADERS([dolfin.h], [ ],
-  [AC_MSG_WARN([dolfin required to install $PACKAGE_NAME])]
+AC_CHECK_HEADER([dolfin.h], 
+  [AC_DEFINE([HAVE_DOLFIN_H], [1], [ ]) LIBS="-ldolfin $LIBS"],
+  [AC_MSG_WARN([dolfin required to install all the functionalities of $PACKAGE_NAME])]
 )
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
