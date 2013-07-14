@@ -1,12 +1,12 @@
-Summary of important user-visible changes for msh 1.0.7:
+Summary of important user-visible changes for msh 1.0.8:
 -------------------------------------------------------------------
 
+ ** 1.0.8 is just a bugfix relases that solves some issues arising during the installation.
+-------------------------------------------------------------------
+Summary of important user-visible changes for msh 1.0.7:
+-------------------------------------------------------------------
  ** Added new functions mshm_dolfin_read and mshm_dolfin_write for 
     importing/exportinf DOLFIN mesh 
 
  ** Added the function mshm_refine for refining a mesh (depends on dolfin)
-
-Summary of important user-visible changes for msh 1.0.6:
 -------------------------------------------------------------------
-
- ** 1.0.6 is just a bugfix relases that solves some minor issues with unit tests in 1.0.5.
