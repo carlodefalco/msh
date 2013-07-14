@@ -1,14 +1,14 @@
 MKOCTFILE ?= mkoctfile
 
-OCTFILES=mshm_refine.oct mshm_dolfin_read.oct mshm_dolfin_write.oct
+OCTFILES= mshm_refine.oct mshm_dolfin_read.oct mshm_dolfin_write.oct
 
-CPPFLAGS += @DEFS@
-LIBS += @LIBS@
+CPPFLAGS += @ac_dolfin_cpp_flags@
+LDFLAGS += @ac_dolfin_ld_flags@
 
 all: $(OCTFILES)
 
 %.oct:  %.cc
-	$(MKOCTFILE) $(CPPFLAGS) $< $(LDFLAGS) $(LIBS)
+	$(MKOCTFILE) $(CPPFLAGS) $< $(LDFLAGS)
 
 clean:
 	-rm -f *.o core octave-core *.oct *~ *.xml

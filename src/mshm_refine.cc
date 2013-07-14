@@ -406,6 +406,27 @@ the same structure as @var{mesh}\n\
 }
 
 /*
+%!demo
+%! # Create a uniform mesh 
+%! msh = msh2m_structured_mesh (linspace (0, 1, 4), linspace (0, 1, 4), 1, [1 : 4]);
+%! # Refine it only on cells from 1 to 3
+%! partially_refined_mesh = mshm_refine (msh,[1:3]);
+%! # Refine the original mesh uniformly
+%! uniformly_refined_mesh = mshm_refine (msh);
+%!
+%! # plot the result 
+%! clf;
+%! subplot (1, 3, 1);
+%! msh2p_mesh (msh);
+%! title ('original mesh');
+%! subplot (1, 3, 2);
+%! msh2p_mesh (partially_refined_mesh);
+%! title ('partially refined mesh');
+%! subplot (1, 3, 3);
+%! msh2p_mesh (uniformly_refined_mesh);
+%! title ('uniformly refined mesh');
+*/
+/*
 %!test
 %! x = y = linspace (0, 1, 2);
 %! msh = msh2m_structured_mesh (x, y, 1, [1 : 4]);
@@ -428,18 +449,4 @@ the same structure as @var{mesh}\n\
 %!       0   0   0   0   0   0   0   0
 %!       0   0   0   0   0   0   0   0];
 %! assert (msh_rr.e, e)
-%!demo
-%! msh = msh2m_structured_mesh (linspace (0, 1, 4), linspace (0, 1, 4), 1, [1 : 4]);
-%! partially_refined_mesh = mshm_refine (msh,[1:3]);
-%! uniformly_refined_mesh = mshm_refine (msh);
-%! clf;
-%! subplot (1, 3, 1);
-%! msh2p_mesh (msh);
-%! title ('original mesh');
-%! subplot (1, 3, 2);
-%! msh2p_mesh (partially_refined_mesh);
-%! title ('partially refined mesh');
-%! subplot (1, 3, 3);
-%! msh2p_mesh (uniformly_refined_mesh);
-%! title ('uniformly refined mesh');
 */

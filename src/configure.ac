@@ -10,9 +10,9 @@ if [test $HAVE_MKOCTFILE = "no"]; then
 fi
 
 AC_CHECK_HEADER([dolfin.h], 
-  [AC_DEFINE([HAVE_DOLFIN_H], [1], [ ]) LIBS="-ldolfin $LIBS"],
-  [AC_MSG_WARN([dolfin required to install all the functionalities of $PACKAGE_NAME])]
-)
+  [AC_SUBST(ac_dolfin_cpp_flags,-DHAVE_DOLFIN_H) AC_SUBST(ac_dolfin_ld_flags,-ldolfin)],
+  [AC_MSG_WARN([dolfin headers could not be found, som functionalities will be disabled, don't worry your package will still be working, though.])]
+ )
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
