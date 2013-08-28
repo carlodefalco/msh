@@ -79,23 +79,23 @@ function [varargout] = msh3m_geometrical_properties(imesh,varargin)
     request = varargin{nn};
     switch request
       case "wjacdet" # Weighted Jacobian determinant
-	b = wjacdet(x1,y1,z1,\
-		    x2,y2,z2,\
-		    x3,y3,z3,\
+	b = wjacdet(x1,y1,z1,...
+		    x2,y2,z2,...
+		    x3,y3,z3,...
 		    x4,y4,z4);
 	varargout{nn} = b;
         clear b
       case "area" # Element area
-	tmp = wjacdet(x1,y1,z1,\
-		      x2,y2,z2,\
-		      x3,y3,z3,\
+	tmp = wjacdet(x1,y1,z1,...
+		      x2,y2,z2,...
+		      x3,y3,z3,...
 		      x4,y4,z4);
 	b   = sum(tmp,1);
 	varargout{nn} = b;
       case "shg" # Gradient of shape functions
-	b = shg(x1,y1,z1,\
-		x2,y2,z2,\
-		x3,y3,z3,\
+	b = shg(x1,y1,z1,...
+		x2,y2,z2,...
+		x3,y3,z3,...
 		x4,y4,z4);
 	varargout{nn} = b;
         clear b
