@@ -332,6 +332,7 @@ the same structure as @var{mesh}\n\
 
                    boost::shared_ptr<dolfin::Mesh> r_mesh(new dolfin::Mesh ());
                    dolfin::refine (*r_mesh, mesh, cell_markers);
+                   mesh.clear ();
 
                    std::size_t num_v = (*r_mesh).num_vertices ();
                    dims(0) = D;
