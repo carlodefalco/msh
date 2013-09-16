@@ -28,12 +28,16 @@
 ##
 ## Valid properties are:
 ## @itemize @bullet
+## @item @code{"bar"}: return a matrix with size 3 times the number of mesh
+## elements containing the center of mass coordinates.
 ## @item @code{"wjacdet"}: return the weigthed Jacobian determinant used
 ## for the numerical integration with trapezoidal rule over an element.
 ## @item @code{"shg"}: return a matrix of size 3 times the number of
 ## elements matrix containing the gradient of P1 shape functions.
 ## @item @code{"shp"}: return a matrix containing the the value of P1 shape
-## functions. 
+## functions.
+## @item @code{"area"}: return a row vector containing the volume of each
+## element.
 ## @end itemize
 ##
 ## The output will contain the geometrical properties requested in the
@@ -46,16 +50,16 @@
 ## @end deftypefn
 
 
-function [varargout] = msh3m_geometrical_properties(imesh,varargin)
+function [varargout] = msh3m_geometrical_properties (imesh,varargin)
 
   ## Check input
-  if nargin < 2 # Number of input parameters
-    error("msh3m_geometrical_properties: wrong number of input parameters.");
-  elseif !(isstruct(imesh)    && isfield(imesh,"p") &&
-	   isfield(imesh,"t") && isfield(imesh,"e"))
-    error("msh3m_geometrical_properties: first input is not a valid mesh structure.");
-  elseif !iscellstr(varargin)
-    error("msh3m_geometrical_properties: only string value admitted for properties.");
+  if (nargin < 2) # Number of input parameters
+    error ("msh3m_geometrical_properties: wrong number of input parameters.");
+  elseif (! (isstruct (imesh) && isfield (imesh,"p") &&
+     isfield (imesh,"t") && isfield (imesh,"e")))
+    error ("msh3m_geometrical_properties: first input is not a valid mesh structure.");
+  elseif (! iscellstr (varargin))
+    error ("msh3m_geometrical_properties: only string value admitted for properties.");
   endif
   
   ## Compute properties
@@ -74,36 +78,74 @@ function [varargout] = msh3m_geometrical_properties(imesh,varargin)
   y4 = imesh.p(2,imesh.t(4,:));
   z4 = imesh.p(3,imesh.t(4,:));
 
-  for nn = 1:length(varargin)
+  nelem = columns(imesh.t); # Number of elements in the mesh
+
+  for nn = 1:length (varargin)
     
     request = varargin{nn};
+    
     switch request
+    
+      case "bar" # Center of mass coordinates
+      	if isfield (imesh,"bar")
+          varargout{nn} = mesh.bar;
+      	else
+          b = zeros (3, nelem);
+          b(1,:) = ( x1 + x2 + x3 + x4 )/4;
+          b(2,:) = ( y1 + y2 + y3 + y4 )/4;
+          b(3,:) = ( z1 + z2 + z3 + z4 )/4;
+          varargout{nn} = b;
+          clear b;
+      	endif
+
       case "wjacdet" # Weighted Jacobian determinant
-	b = wjacdet(x1,y1,z1,...
-		    x2,y2,z2,...
-		    x3,y3,z3,...
-		    x4,y4,z4);
-	varargout{nn} = b;
-        clear b
+      	if isfield (imesh,"wjacdet")
+          varargout{nn} = mesh.wjacdet;
+        else
+          b = wjacdet (x1,y1,z1,...
+                       x2,y2,z2,...
+                       x3,y3,z3,...
+                       x4,y4,z4);
+          varargout{nn} = b;
+          clear b
+        endif
+          
       case "area" # Element area
-	tmp = wjacdet(x1,y1,z1,...
-		      x2,y2,z2,...
-		      x3,y3,z3,...
-		      x4,y4,z4);
-	b   = sum(tmp,1);
-	varargout{nn} = b;
+       	if isfield (imesh,"area")
+          varargout{nn} = mesh.area;
+        else
+          tmp = wjacdet (x1,y1,z1,...
+                         x2,y2,z2,...
+                         x3,y3,z3,...
+                         x4,y4,z4);
+          b   = sum (tmp,1);
+          varargout{nn} = b;
+          clear b;
+        endif
+        
       case "shg" # Gradient of shape functions
-	b = shg(x1,y1,z1,...
-		x2,y2,z2,...
-		x3,y3,z3,...
-		x4,y4,z4);
-	varargout{nn} = b;
-        clear b
+      	if isfield (imesh,"shg")
+          varargout{nn} = mesh.shg;
+        else
+          b = shg (x1,y1,z1,...
+                   x2,y2,z2,...
+                   x3,y3,z3,...
+                   x4,y4,z4);
+          varargout{nn} = b;
+          clear b
+        endif
+
       case "shp" # Value of shape functions
-	varargout{nn} = eye(4);
+        if isfield (imesh,"shp")
+          varargout{nn} = mesh.shp;
+        else
+          varargout{nn} = eye (4);
+        endif
+        
       otherwise
-	warning("msh3m_geometrical_properties: unexpected value in property string. Empty vector passed as output.")
-	varargout{nn} = [];
+        warning ("msh3m_geometrical_properties: unexpected value in property string. Empty vector passed as output.")
+        varargout{nn} = [];
+        
     endswitch
     
   endfor
