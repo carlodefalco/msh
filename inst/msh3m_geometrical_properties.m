@@ -28,16 +28,12 @@
 ##
 ## Valid properties are:
 ## @itemize @bullet
-## @item @code{"bar"}: return a matrix with size 3 times the number of mesh
-## elements containing the center of mass coordinates.
 ## @item @code{"wjacdet"}: return the weigthed Jacobian determinant used
 ## for the numerical integration with trapezoidal rule over an element.
 ## @item @code{"shg"}: return a matrix of size 3 times the number of
 ## elements matrix containing the gradient of P1 shape functions.
 ## @item @code{"shp"}: return a matrix containing the the value of P1 shape
-## functions.
-## @item @code{"area"}: return a row vector containing the volume of each
-## element.
+## functions. 
 ## @end itemize
 ##
 ## The output will contain the geometrical properties requested in the
@@ -50,109 +46,74 @@
 ## @end deftypefn
 
 
-function [varargout] = msh3m_geometrical_properties (imesh,varargin)
+function [varargout] = msh3m_geometrical_properties(imesh,varargin)
 
   ## Check input
-  if (nargin < 2) # Number of input parameters
-    error ("msh3m_geometrical_properties: wrong number of input parameters.");
-  elseif (! (isstruct (imesh) && isfield (imesh,"p") &&
-     isfield (imesh,"t") && isfield (imesh,"e")))
-    error ("msh3m_geometrical_properties: first input is not a valid mesh structure.");
-  elseif (! iscellstr (varargin))
-    error ("msh3m_geometrical_properties: only string value admitted for properties.");
+  if nargin < 2 # Number of input parameters
+    error("msh3m_geometrical_properties: wrong number of input parameters.");
+  elseif !(isstruct(imesh)    && isfield(imesh,"p") &&
+	   isfield(imesh,"t") && isfield(imesh,"e"))
+    error("msh3m_geometrical_properties: first input is not a valid mesh structure.");
+  elseif !iscellstr(varargin)
+    error("msh3m_geometrical_properties: only string value admitted for properties.");
   endif
   
   ## Compute properties
 
   ## Extract tetrahedra node coordinates
-  x1 = imesh.p(1,imesh.t(1,:));
-  y1 = imesh.p(2,imesh.t(1,:));
-  z1 = imesh.p(3,imesh.t(1,:));
-  x2 = imesh.p(1,imesh.t(2,:));
-  y2 = imesh.p(2,imesh.t(2,:));
-  z2 = imesh.p(3,imesh.t(2,:));
-  x3 = imesh.p(1,imesh.t(3,:));
-  y3 = imesh.p(2,imesh.t(3,:));
-  z3 = imesh.p(3,imesh.t(3,:));
-  x4 = imesh.p(1,imesh.t(4,:));
-  y4 = imesh.p(2,imesh.t(4,:));
-  z4 = imesh.p(3,imesh.t(4,:));
+  x1 = imesh.p(1, imesh.t(1, :));
+  y1 = imesh.p(2, imesh.t(1, :));
+  z1 = imesh.p(3, imesh.t(1, :));
+  x2 = imesh.p(1, imesh.t(2, :));
+  y2 = imesh.p(2, imesh.t(2, :));
+  z2 = imesh.p(3, imesh.t(2, :));
+  x3 = imesh.p(1, imesh.t(3, :));
+  y3 = imesh.p(2, imesh.t(3, :));
+  z3 = imesh.p(3, imesh.t(3, :));
+  x4 = imesh.p(1, imesh.t(4, :));
+  y4 = imesh.p(2, imesh.t(4, :));
+  z4 = imesh.p(3, imesh.t(4, :));
 
-  nelem = columns(imesh.t); # Number of elements in the mesh
-
-  for nn = 1:length (varargin)
+  for nn = 1:length(varargin)
     
     request = varargin{nn};
-    
     switch request
-    
-      case "bar" # Center of mass coordinates
-      	if isfield (imesh,"bar")
-          varargout{nn} = mesh.bar;
-      	else
-          b = zeros (3, nelem);
-          b(1,:) = ( x1 + x2 + x3 + x4 )/4;
-          b(2,:) = ( y1 + y2 + y3 + y4 )/4;
-          b(3,:) = ( z1 + z2 + z3 + z4 )/4;
-          varargout{nn} = b;
-          clear b;
-      	endif
-
       case "wjacdet" # Weighted Jacobian determinant
-      	if isfield (imesh,"wjacdet")
-          varargout{nn} = mesh.wjacdet;
-        else
-          b = wjacdet (x1,y1,z1,...
-                       x2,y2,z2,...
-                       x3,y3,z3,...
-                       x4,y4,z4);
-          varargout{nn} = b;
-          clear b
-        endif
-          
+	b = wjacdet (x1, y1, z1, ...
+                 x2, y2, z2, ...
+                 x3, y3, z3, ...
+                 x4, y4, z4);
+	varargout{nn} = b;
+        clear b
       case "area" # Element area
-       	if isfield (imesh,"area")
-          varargout{nn} = mesh.area;
-        else
-          tmp = wjacdet (x1,y1,z1,...
-                         x2,y2,z2,...
-                         x3,y3,z3,...
-                         x4,y4,z4);
-          b   = sum (tmp,1);
-          varargout{nn} = b;
-          clear b;
-        endif
-        
+	tmp = wjacdet (x1, y1, z1, ...
+                   x2 ,y2 ,z2, ...
+                   x3 ,y3 ,z3, ...
+                   x4 ,y4 ,z4);
+	b       = sum(tmp,1);
+	varargout{nn} = b;
       case "shg" # Gradient of shape functions
-      	if isfield (imesh,"shg")
-          varargout{nn} = mesh.shg;
-        else
-          b = shg (x1,y1,z1,...
-                   x2,y2,z2,...
-                   x3,y3,z3,...
-                   x4,y4,z4);
-          varargout{nn} = b;
-          clear b
-        endif
-
+	b = shg (x1, y1, z1, ...
+             x2, y2, z2, ...
+             x3, y3, z3, ...
+             x4, y4, z4);
+	varargout{nn} = b;
+        clear b
       case "shp" # Value of shape functions
-        if isfield (imesh,"shp")
-          varargout{nn} = mesh.shp;
-        else
-          varargout{nn} = eye (4);
-        endif
-        
+	varargout{nn} = eye(4);
       otherwise
-        warning ("msh3m_geometrical_properties: unexpected value in property string. Empty vector passed as output.")
-        varargout{nn} = [];
-        
+	warning("msh3m_geometrical_properties: unexpected value in property string. Empty vector passed as output.")
+	varargout{nn} = [];
     endswitch
     
   endfor
 
 endfunction
 
-function [b] = wjacdet(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4)
+function [b] = wjacdet (x1, y1, z1, ...
+                        x2, y2, z2, ...
+                        x3, y3, z3, ...
+                        x4, y4, z4)
   
   ## Compute weighted yacobian determinant
   
@@ -173,7 +134,10 @@ function [b] = wjacdet(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4)
   
 endfunction
 
-function [b] = shg(x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4)
+function [b] = shg (x1, y1, z1, ...
+                    x2, y2, z2, ...
+                    x3, y3, z3, ...
+                    x4, y4, z4)
 
   ## Compute gradient of shape functions
 
