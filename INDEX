@@ -29,3 +29,6 @@ Mesh plotting
 Mesh conversion from DOLFIN
   mshm_dolfin_read
   mshm_dolfin_write
+Mesh export to gmsh
+  msh2m_gmsh_write
+  msh3m_gmsh_write

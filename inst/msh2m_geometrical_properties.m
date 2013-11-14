@@ -60,143 +60,154 @@
 ## @seealso{msh2m_topological_properties, msh3m_geometrical_properties}
 ## @end deftypefn
 
-function [varargout] = msh2m_geometrical_properties(mesh,varargin)
+function varargout = msh2m_geometrical_properties (mesh, varargin)
 
   ## Check input
-  if nargin < 2 # Number of input parameters
-    error("msh2m_geometrical_properties: wrong number of input parameters.");
-  elseif !(isstruct(mesh)    && isfield(mesh,"p") &&
-	   isfield(mesh,"t") && isfield(mesh,"e"))
-    error("msh2m_geometrical_properties: first input is not a valid mesh structure.");
-  elseif !iscellstr(varargin)
-    error("msh2m_geometrical_properties: only string value admitted for properties.");
+
+  if (nargin < 2) # Number of input parameters
+
+    error (["msh2m_geometrical_properties: ", ...
+            "wrong number of input parameters."]);
+
+  elseif (! (isstruct (mesh) && isfield (mesh, "p") 
+             && isfield (mesh, "t") && isfield (mesh, "e")))
+  
+    error (["msh2m_geometrical_properties: ", ...
+            "first input is not a valid mesh structure."]);
+
+  elseif (! iscellstr (varargin))
+
+    error (["msh2m_geometrical_properties: ", ... 
+            "only string value admitted for properties."]);
   endif
   
   ## Compute properties
   p = mesh.p;
   e = mesh.e;
   t = mesh.t;
-  nelem = columns(t); # Number of elements in the mesh
+  nelem = columns (t);
   
-  [k,j,w] = coeflines(p,t,nelem); # Edges coefficients
+  [k,j,w] = coeflines (p, t, nelem); # Edge coefficients
 
-  for nn = 1:length(varargin)
+  for nn = 1:length (varargin)
     
     request = varargin{nn};
     switch request
-	
+        
       case "bar" # Center of mass coordinates
-	if isfield(mesh,"bar")
+        if (isfield (mesh, "bar"))
           varargout{nn} = mesh.bar;
-	else
-          [b] = coordinates(p,t,nelem,j,w,k,"bar");
+        else
+          [b] = coordinates (p, t, nelem, j, w, k, "bar");
           varargout{nn} = b;
           clear b;
-	endif
-	
-      case "cir" # Circum center coordinates
-	if isfield(mesh,"cir")
+        endif
+        
+      case "cir" # Circum-center coordinates
+        if (isfield (mesh, "cir"))
           varargout{nn} = mesh.cir;
-	else
+        else
           [b] = coordinates(p,t,nelem,j,w,k,"cir");
           varargout{nn} = b;
           clear b;
-	endif
+        endif
 
       case "emidp" # Boundary edges midpoint coordinates
-	if isfield(mesh,"emidp")
+        if (isfield (mesh, "emidp"))
           varargout{nn} = mesh.emidp;
-	else
-          [b] = midpoint(p,e);
+        else
+          b = midpoint (p, e);
           varargout{nn} = b;
           clear b;
-	endif
+        endif
 
       case "slength" # Length of every side
-	if isfield(mesh,"slength")
+        if (isfield (mesh, "slength"))
           varargout{nn} = mesh.slength;
-	else
-          [b] = sidelength(p,t,nelem);
+        else
+          b = sidelength (p, t, nelem);
           varargout{nn} = b;
           clear b;
-	endif
+        endif
 
       case "cdist" # Distance among circumcenters of neighbouring elements
-	if isfield(mesh,"cdist")
+        if (isfield (mesh, "cdist"))
           varargout{nn} = mesh.cdist;
-	else
+        else
 
-          if isfield(mesh,"cir")
+          if (isfield (mesh,"cir"))
             cir = mesh.cir;
           else
-            [cir] = coordinates(p,t,nelem,j,w,k,"cir");
+            cir = coordinates (p, t, nelem, j, w, k, "cir");
           endif
 
-          if isfield(mesh,"n")
+          if (isfield (mesh, "n"))
             n = mesh.n;
           else      
-            [n] = msh2m_topological_properties(mesh,"n");
+            n = msh2m_topological_properties (mesh, "n");
           endif
 
-          [b] = distance(cir,n,nelem);
-          [semib] = semidistance(cir,nelem,j,w,k);
-          border = isnan(n);
-          [index1] = find( border(1,:) );
-          [index2] = find( border(2,:) );
-          [index3] = find( border(3,:) );
-          b(1,index1) = semib(1,index1);
-          b(2,index2) = semib(2,index2);
-          b(3,index3) = semib(3,index3);
+          b = distance (cir, n, nelem);
+          semib = semidistance (cir, nelem, j, w, k);
+          border = isnan (n);
+          index1 = find (border(1,:));
+          index2 = find (border(2,:));
+          index3 = find (border(3,:));
+          b(1,index1) = semib (1,index1);
+          b(2,index2) = semib (2,index2);
+          b(3,index3) = semib (3,index3);
           varargout{nn} = b;
           clear b semib index1 index2 index3 border;
-	endif
+        endif
 
       case "wjacdet" # Weighted Jacobian determinant
-	if isfield(mesh,"wjacdet")
+        if (isfield (mesh, "wjacdet"))
           varargout{nn} = mesh.wjacdet;
-	else
-          [b] = computearea(p,e,t,"wjac");
+        else
+          b = computearea (p, e, t, "wjac");
           varargout{nn} = b;
           clear b
-	endif
-	
+        endif
+        
       case "area" # Area of the elements
-	if isfield(mesh,"area")
+        if (isfield (mesh, "area"))
           varargout{nn} = mesh.area;
-	else
-          [b] = computearea(p,e,t,"area");
+        else
+          b = computearea (p, e, t, "area");
           varargout{nn} = b;
           clear b
-	endif
-	
+        endif
+        
       case "shg" # Gradient of hat functions
-	if isfield(mesh,"shg")
+        if (isfield (mesh, "shg"))
           varargout{nn} = mesh.shg;
-	else
-          [b] = shapegrad(p,t);
+        else
+          b = shapegrad (p, t);
           varargout{nn} = b;
           clear b
-	endif
+        endif
 
       case "midedge" # Mid-edge coordinates
-	if isfield(mesh,"midedge")
+        if (isfield (mesh, "midedge"))
           varargout{nn} = mesh.midedge;
-	else
-          [b] = midedge(p,t,nelem);
+        else
+          b = midedge (p, t, nelem);
           varargout{nn} = b;
           clear b;
-	endif
+        endif
 
       otherwise
-	warning("msh2m_geometrical_properties: unexpected value in property string. Empty vector passed as output.")
-	varargout{nn} = [];
+        warning (["msh2m_geometrical_properties: ", ...
+                  "unexpected value in property string. ", ...
+                  "Empty vector passed as output."])
+        varargout{nn} = [];
     endswitch
 
   endfor
 
 endfunction
 
-function [k,j,w] = coeflines(p,t,nelem)
+function [k, j, w] = coeflines (p, t, nelem)
 
   ## Edges are described by the analytical expression:
   ##
@@ -205,73 +216,89 @@ function [k,j,w] = coeflines(p,t,nelem)
   ## Coefficients k,j,w are stored in matrixes
   
   ## i-th edge list, i =1,2,3
-  s1 = sort(t(2:3,:),1);
-  s2 = sort(t([3,1],:),1);
-  s3 = sort(t(1:2,:),1);  
+  s1 = sort (t(2:3,:),1);
+  s2 = sort (t([3,1],:),1);
+  s3 = sort (t(1:2,:),1);  
   ## Initialization of the matrix data-structure
   k = ones(3,nelem);
   j = ones(3,nelem);
   w = ones(3,nelem);
   ## Searching for lines parallel to x axis
-  [i1] = find( (p(2,s1(2,:)) - p(2,s1(1,:))) != 0 );
+  [i1] = find ((p(2,s1(2,:)) - p(2,s1(1,:))) != 0);
   noti1 = setdiff([1:nelem], i1);
-  [i2] = find( (p(2,s2(2,:)) - p(2,s2(1,:))) != 0 );
+  [i2] = find ((p(2,s2(2,:)) - p(2,s2(1,:))) != 0);
   noti2 = setdiff([1:nelem], i2);
-  [i3] = find( (p(2,s3(2,:)) - p(2,s3(1,:))) != 0 );
+  [i3] = find ((p(2,s3(2,:)) - p(2,s3(1,:))) != 0);
   noti3 = setdiff([1:nelem], i3);
   ## Computation of the coefficients
   ## Edge 1
-  j(1,i1) = (p(1,s1(1,i1)) - p(1,s1(2,i1)))./(p(2,s1(2,i1)) - p(2,s1(1,i1)));
+  j(1,i1) = (p(1,s1(1,i1)) - p(1,s1(2,i1))) ./ ...
+            (p(2,s1(2,i1)) - p(2,s1(1,i1)));
   w(1,i1) = -(p(1,s1(1,i1)) + p(2,s1(1,i1)).*j(1,i1));
   k(1,noti1) = 0;
   j(1,noti1) = 1;
   w(1,noti1) = - p(2,s1(1,noti1));
   ## Edge 2
-  j(2,i2) = (p(1,s2(1,i2)) - p(1,s2(2,i2)))./(p(2,s2(2,i2)) - p(2,s2(1,i2)));
+  j(2,i2) = (p(1,s2(1,i2)) - p(1,s2(2,i2))) ./ ...
+            (p(2,s2(2,i2)) - p(2,s2(1,i2)));
   w(2,i2) = -(p(1,s2(1,i2)) + p(2,s2(1,i2)).*j(2,i2));
   k(2,noti2) = 0;
   j(2,noti2) = 1;
   w(2,noti2) = - p(2,s2(1,noti2));
   ## Edge 3
-  j(3,i3) = (p(1,s3(1,i3)) - p(1,s3(2,i3)))./(p(2,s3(2,i3)) - p(2,s3(1,i3)));
+  j(3,i3) = (p(1,s3(1,i3)) - p(1,s3(2,i3))) ./ ...
+            (p(2,s3(2,i3)) - p(2,s3(1,i3)));
   w(3,i3) = -(p(1,s3(1,i3)) + p(2,s3(1,i3)).*j(3,i3));
   k(3,noti3) = 0;
   j(3,noti3) = 1;
   w(3,noti3) = - p(2,s3(1,noti3));
 endfunction
 
-function [b] = coordinates(p,t,nelem,j,w,k,string)
+function b = coordinates (p, t, nelem, j, w, k, string)
 
   ## Compute the coordinates of the geometrical entity specified by string
 
   ## Initialization of the output vectors
-  b = zeros(2, nelem);
+  b = zeros (2, nelem);
   switch string
     case "bar"
-      b(1,:) = ( p(1,t(1,:)) + p(1,t(2,:)) + p(1,t(3,:)) )/3;
-      b(2,:) = ( p(2,t(1,:)) + p(2,t(2,:)) + p(2,t(3,:)) )/3;
+      b(1,:) = (p(1,t(1,:)) + p(1,t(2,:)) + p(1,t(3,:))) / 3;
+      b(2,:) = (p(2,t(1,:)) + p(2,t(2,:)) + p(2,t(3,:))) / 3;
     case "cir"
       ## Computation of the midpoint of the first two edges
-      mid1 = zeros(2,nelem);
-      mid2 = zeros(2,nelem);
+      mid1 = zeros (2, nelem);
+      mid2 = zeros (2, nelem);
       ## X coordinate
-      mid1(1,:) = ( p(1,t(2,:)) + p(1,t(3,:)) )/2;
-      mid2(1,:) = ( p(1,t(3,:)) + p(1,t(1,:)) )/2;
+      mid1(1,:) = (p(1,t(2,:)) + p(1,t(3,:))) / 2;
+      mid2(1,:) = (p(1,t(3,:)) + p(1,t(1,:))) / 2;
       ## Y coordinate
-      mid1(2,:) = ( p(2,t(2,:)) + p(2,t(3,:)) )/2;
-      mid2(2,:) = ( p(2,t(3,:)) + p(2,t(1,:)) )/2;
+      mid1(2,:) = (p(2,t(2,:)) + p(2,t(3,:))) / 2;
+      mid2(2,:) = (p(2,t(3,:)) + p(2,t(1,:))) / 2;
       ## Computation of the intersect between axis 1 and axis 2
       ## Searching for element with edge 1 parallel to x-axes
-      [parx] = find( j(1,:) == 0);
-      [notparx] = setdiff(1:nelem, parx);
-      coefy = zeros(1,nelem);
+      parx = find (j(1,:) == 0);
+      notparx = setdiff (1:nelem, parx);
+      coefy = zeros (1, nelem);
       ## If it is not parallel
-      coefy(notparx) = ((j(2,notparx)./j(1,notparx)).*k(1,notparx) - k(2,notparx)).^(-1);
-      b(2,notparx) = coefy(1,notparx).*( j(2,notparx).*mid2(1,notparx) - k(2,notparx).*mid2(2,notparx) + k(1,notparx)./j(1,notparx).*j(2,notparx).*mid1(2,notparx) - j(2,notparx).*mid1(1,notparx) );
-      b(1,notparx) =( k(1,notparx).*b(2,notparx) + j(1,notparx).*mid1(1,notparx) - k(1,notparx).*mid1(2,notparx) )./j(1,notparx);
+      coefy(notparx) = ((j(2,notparx)./j(1,notparx)) .* 
+                        k(1,notparx) - k(2,notparx)).^(-1);
+
+      b(2,notparx) = coefy(1,notparx) .* ...
+                     (j(2,notparx) .* mid2(1,notparx) - 
+                      k(2,notparx) .* mid2(2,notparx) + 
+                      k(1,notparx) ./ j(1,notparx) .* 
+                      j(2,notparx) .* mid1(2,notparx) - 
+                      j(2,notparx) .* mid1(1,notparx));
+
+      b(1,notparx) = (k(1,notparx) .* b(2,notparx) + 
+                      j(1,notparx) .* mid1(1,notparx) - 
+                      k(1,notparx) .* mid1(2,notparx)) ./ ...
+                     j(1,notparx);
       ## If it is parallel
       b(2,parx) = mid1(2,parx);
-      b(1,parx) = k(2,parx)./j(2,parx).*( b(2,parx) - mid2(2,parx) ) + mid2(1,parx);
+      b(1,parx) = k(2,parx) ./ j(2,parx) .* ...
+                  (b(2,parx) - mid2(2,parx)) + ...
+                  mid2(1,parx);
   endswitch
 endfunction
 
@@ -280,8 +307,8 @@ function [b] = midpoint(p,e)
   ## Compute the coordinates of the midpoint on the boundary edges
 
   b = zeros(2,columns(e));
-  b(1,:) = ( p(1,e(1,:)) + p(1,e(2,:)) )./2;
-  b(2,:) = ( p(2,e(1,:)) + p(2,e(2,:)) )./2;
+  b(1,:) = (p(1,e(1,:)) + p(1,e(2,:)))./2;
+  b(2,:) = (p(2,e(1,:)) + p(2,e(2,:)))./2;
 endfunction
 
 function [l] = sidelength(p,t,nelem)
@@ -290,15 +317,18 @@ function [l] = sidelength(p,t,nelem)
   
   l = zeros(3, nelem);
   ## i-th edge list, i =1,2,3
-  s1 = sort(t(2:3,:),1);
-  s2 = sort(t([3,1],:),1);
-  s3 = sort(t(1:2,:),1);
+  s1 = sort (t(2:3,:),1);
+  s2 = sort (t([3,1],:),1);
+  s3 = sort (t(1:2,:),1);
   ## First side length
-  l(1,:) = sqrt( (p(1,s1(1,:)) - p(1,s1(2,:))).^2 + (p(2,s1(1,:)) - p(2,s1(2,:))).^2 );
+  l(1,:) = sqrt ((p(1,s1(1,:)) - p(1,s1(2,:))).^2 + 
+                 (p(2,s1(1,:)) - p(2,s1(2,:))).^2);
   ## Second side length
-  l(2,:) = sqrt( (p(1,s2(1,:)) - p(1,s2(2,:))).^2 + (p(2,s2(1,:)) - p(2,s2(2,:))).^2 );
+  l(2,:) = sqrt ((p(1,s2(1,:)) - p(1,s2(2,:))).^2 + 
+                 (p(2,s2(1,:)) - p(2,s2(2,:))).^2);
   ## Third side length
-  l(3,:) = sqrt( (p(1,s3(1,:)) - p(1,s3(2,:))).^2 + (p(2,s3(1,:)) - p(2,s3(2,:))).^2 );
+  l(3,:) = sqrt ((p(1,s3(1,:)) - p(1,s3(2,:))).^2 +
+                 (p(2,s3(1,:)) - p(2,s3(2,:))).^2);
 endfunction
 
 function [d] = semidistance(b,nelem,j,w,k)
@@ -313,9 +343,12 @@ function [d] = semidistance(b,nelem,j,w,k)
   ## Initialization of the distance output vector
   d = zeros(3, nelem);
   ## Computation of the distances from the geometrical entity to the edges
-  d(1,:) = abs( k(1,:).*b(1,:) + j(1,:).*b(2,:) + w(1,:))./(sqrt( k(1,:).^2 + j(1,:).^2));
-  d(2,:) = abs( k(2,:).*b(1,:) + j(2,:).*b(2,:) + w(2,:))./(sqrt( k(2,:).^2 + j(2,:).^2));
-  d(3,:) = abs( k(3,:).*b(1,:) + j(3,:).*b(2,:) + w(3,:))./(sqrt( k(3,:).^2 + j(3,:).^2));
+  d(1,:) = abs (k(1,:).*b(1,:) + j(1,:).*b(2,:) + w(1,:)) ./ ...
+           (sqrt (k(1,:).^2 + j(1,:).^2));
+  d(2,:) = abs (k(2,:).*b(1,:) + j(2,:).*b(2,:) + w(2,:)) ./ ...
+           (sqrt (k(2,:).^2 + j(2,:).^2));
+  d(3,:) = abs (k(3,:).*b(1,:) + j(3,:).*b(2,:) + w(3,:)) ./ ...
+           (sqrt (k(3,:).^2 + j(3,:).^2));
 endfunction
 
 function [d] = distance(b,n,nelem)
@@ -326,13 +359,16 @@ function [d] = distance(b,n,nelem)
   d = NaN(3, nelem);
   ## Trg not on the geometrical border
   border = isnan(n);
-  [index1] = find( border(1,:) == 0 );
-  [index2] = find( border(2,:) == 0 );
-  [index3] = find( border(3,:) == 0 );
+  [index1] = find (border(1,:) == 0);
+  [index2] = find (border(2,:) == 0);
+  [index3] = find (border(3,:) == 0);
   ## Computation of the distances between two neighboring geometrical entities
-  d(1,index1) = sqrt( ( b(1,index1) - b(1,n(1,index1)) ).^2 + ( b(2,index1) - b(2,n(1,index1)) ).^2 );
-  d(2,index2) = sqrt( ( b(1,index2) - b(1,n(2,index2)) ).^2 + ( b(2,index2) - b(2,n(2,index2)) ).^2 );
-  d(3,index3) = sqrt( ( b(1,index3) - b(1,n(3,index3)) ).^2 + ( b(2,index3) - b(2,n(3,index3)) ).^2 );
+  d(1,index1) = sqrt ((b(1,index1) - b(1,n(1,index1))).^2 + 
+                      (b(2,index1) - b(2,n(1,index1))).^2);
+  d(2,index2) = sqrt ((b(1,index2) - b(1,n(2,index2))).^2 + 
+                      (b(2,index2) - b(2,n(2,index2))).^2);
+  d(3,index3) = sqrt ((b(1,index3) - b(1,n(3,index3))).^2 +
+                      (b(2,index3) - b(2,n(3,index3))).^2);
 endfunction
 
 function [b] = computearea(p,e,t,string)
@@ -344,21 +380,22 @@ function [b] = computearea(p,e,t,string)
   Nelements = columns(t);
 
   jac([1,2],:) = [p(1,t(2,:))-p(1,t(1,:));
-		  p(1,t(3,:))-p(1,t(1,:))];
+                  p(1,t(3,:))-p(1,t(1,:))];
   jac([3,4],:) = [p(2,t(2,:))-p(2,t(1,:));
-		  p(2,t(3,:))-p(2,t(1,:))];
+                  p(2,t(3,:))-p(2,t(1,:))];
   jacdet = jac(1,:).*jac(4,:)-jac(2,:).*jac(3,:);
 
-  degen=find(jacdet <= 0);
+  degen = find (jacdet <= 0);
   if ~isempty(degen)
     ## XXX FIXME: there should be a -verbose option to allow to see this
     ## fprintf(1,"invalid mesh element:  %d  fixing...\n",degen);
     t(1:3,degen) = t([2,1,3],degen);
     jac([1,2],degen) = [p(1,t(2,degen))-p(1,t(1,degen));
-	  		p(1,t(3,degen))-p(1,t(1,degen))];
+                          p(1,t(3,degen))-p(1,t(1,degen))];
     jac([3,4],degen) = [p(2,t(2,degen))-p(2,t(1,degen));
-			p(2,t(3,degen))-p(2,t(1,degen))];
-    jacdet(degen) = jac(1,degen).*jac(4,degen)-jac(2,degen).*jac(3,degen);
+                        p(2,t(3,degen))-p(2,t(1,degen))];
+    jacdet(degen) = jac(1,degen) .* jac(4,degen) - ...
+                    jac(2,degen) .* jac(3,degen);
   endif
 
   for inode = 1:3

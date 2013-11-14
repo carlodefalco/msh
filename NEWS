@@ -1,7 +1,17 @@
+Summary of important user-visible changes for msh 1.0.9:
+-------------------------------------------------------------------
+ ** Added functions to write meshes to file in gmsh format
+
+
 Summary of important user-visible changes for msh 1.0.8:
 -------------------------------------------------------------------
-
  ** 1.0.8 is just a bugfix relases that solves some issues arising during the installation.
+
+
+Summary of important user-visible changes for msh 1.0.8:
+-------------------------------------------------------------------
+ ** 1.0.8 is just a bugfix relases that solves some issues arising during the installation.
+
 -------------------------------------------------------------------
 Summary of important user-visible changes for msh 1.0.7:
 -------------------------------------------------------------------
