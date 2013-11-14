@@ -2,6 +2,7 @@ Summary of important user-visible changes for msh 1.0.9:
 -------------------------------------------------------------------
  ** Added functions to write meshes to file in gmsh format
 
+ ** Added option to compute center of mass for tetrahedral elements
 
 Summary of important user-visible changes for msh 1.0.8:
 -------------------------------------------------------------------
