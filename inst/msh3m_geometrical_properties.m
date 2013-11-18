@@ -88,7 +88,7 @@ function [varargout] = msh3m_geometrical_properties (imesh,varargin)
     
       case "bar" # Center of mass coordinates
       	if isfield (imesh,"bar")
-          varargout{nn} = mesh.bar;
+          varargout{nn} = imesh.bar;
       	else
           b = zeros (3, nelem);
           b(1,:) = ( x1 + x2 + x3 + x4 )/4;
@@ -100,7 +100,7 @@ function [varargout] = msh3m_geometrical_properties (imesh,varargin)
 
       case "wjacdet" # Weighted Jacobian determinant
       	if isfield (imesh,"wjacdet")
-          varargout{nn} = mesh.wjacdet;
+          varargout{nn} = imesh.wjacdet;
         else
           b = wjacdet (x1,y1,z1,...
                        x2,y2,z2,...
@@ -112,7 +112,7 @@ function [varargout] = msh3m_geometrical_properties (imesh,varargin)
           
       case "area" # Element area
        	if isfield (imesh,"area")
-          varargout{nn} = mesh.area;
+          varargout{nn} = imesh.area;
         else
           tmp = wjacdet (x1,y1,z1,...
                          x2,y2,z2,...
@@ -125,7 +125,7 @@ function [varargout] = msh3m_geometrical_properties (imesh,varargin)
         
       case "shg" # Gradient of shape functions
       	if isfield (imesh,"shg")
-          varargout{nn} = mesh.shg;
+          varargout{nn} = imesh.shg;
         else
           b = shg (x1,y1,z1,...
                    x2,y2,z2,...
@@ -137,7 +137,7 @@ function [varargout] = msh3m_geometrical_properties (imesh,varargin)
 
       case "shp" # Value of shape functions
         if isfield (imesh,"shp")
-          varargout{nn} = mesh.shp;
+          varargout{nn} = imesh.shp;
         else
           varargout{nn} = eye (4);
         endif
