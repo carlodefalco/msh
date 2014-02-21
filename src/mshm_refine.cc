@@ -73,7 +73,7 @@ the same structure as @var{mesh}\n\
              error ("mshm_refine: cell index out of bounds");
           else
             {
-               dolfin::Mesh mesh;
+               boost::shared_ptr<dolfin::Mesh> mesh (new dolfin::Mesh ());
                std::size_t D = p.rows ();
 
                if (D < 2 || D > 3)
@@ -81,7 +81,7 @@ the same structure as @var{mesh}\n\
                else
                  {
                    dolfin::MeshEditor editor;
-                   editor.open (mesh, D, D);
+                   editor.open (*mesh, D, D);
                    editor.init_vertices (p.cols ());
                    editor.init_cells (t.cols ());
 
@@ -109,15 +109,14 @@ the same structure as @var{mesh}\n\
                    editor.close ();
 
                    // store information associated with e
-                   mesh.init (D - 1);
-                   dolfin::MeshFunction<std::size_t> facet (mesh, D - 1);
+                   mesh->init (D - 1);
                    std::size_t num_side_edges = e.cols ();
 
                    if (D == 2)
                      {
                        for (uint i = 0; i < num_side_edges; ++i)
                          {
-                           dolfin::Vertex v (mesh, e.xelem (0, i) - 1);
+                           dolfin::Vertex v (*mesh, e.xelem (0, i) - 1);
                            for (dolfin::FacetIterator f (v); ! f.end (); ++f)
                              {
                                if ((*f).entities(0)[0] == e.xelem (0, i) - 1
@@ -125,8 +124,10 @@ the same structure as @var{mesh}\n\
                                    || (*f).entities(0)[0] == e.xelem (1, i) - 1
                                    && (*f).entities(0)[1] == e.xelem (0, i) - 1)
                                  {
-                                   facet.set_value ((*f).index (), e.xelem (4, i), mesh);
-                                   break;
+                                    std::pair <std::size_t, std::size_t>
+                                      idxvl ((*f).index (), e.xelem (4, i));
+                                    mesh->domains ().set_marker (idxvl, D - 1);
+                                    break;
                                  }
                              }
                          }
@@ -136,7 +137,7 @@ the same structure as @var{mesh}\n\
                      {
                        for (uint i = 0; i < num_side_edges; ++i)
                          {
-                           dolfin::Vertex v (mesh, e.xelem (0, i) - 1);
+                           dolfin::Vertex v (*mesh, e.xelem (0, i) - 1);
                            for (dolfin::FacetIterator f (v); ! f.end (); ++f)
                              {
                                if ((*f).entities(0)[0] == e(0, i) - 1
@@ -158,24 +159,23 @@ the same structure as @var{mesh}\n\
                                    && (*f).entities(0)[1] == e.xelem (1, i) - 1
                                    && (*f).entities(0)[2] == e.xelem (0, i) - 1)
                                  {
-                                   facet.set_value ((*f).index (), e.xelem (9, i), mesh);
-                                   break;
+                                    std::pair <std::size_t, std::size_t> 
+                                      idxvl ((*f).index (), e.xelem (9, i));
+                                    mesh->domains ().set_marker (idxvl, D - 1);
+                                    break;
                                  }
                              }
                          }
                      }
 
-                   *(mesh.domains ().markers (D - 1)) = facet;
-
                    // store information associated with t
-                   dolfin::MeshFunction<std::size_t> cell (mesh, D);
                    std::size_t num_cells = t.cols ();
 
                    if (D == 2)
                      {
                        for (uint i = 0; i < num_cells; ++i)
                          {
-                           dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
+                           dolfin::Vertex v (*mesh, t.xelem (0, i) - 1);
                            for (dolfin::CellIterator f (v); ! f.end (); ++f)
                              {
                                if ((*f).entities(0)[0] == t.xelem (0, i) - 1
@@ -197,8 +197,10 @@ the same structure as @var{mesh}\n\
                                    && (*f).entities(0)[1] == t.xelem (1, i) - 1
                                    && (*f).entities(0)[2] == t.xelem (0, i) - 1)
                                  {
-                                   cell.set_value ((*f).index (), t.xelem (3, i), mesh);
-                                   break;
+                                    std::pair <std::size_t, std::size_t>
+                                      idxvl ((*f).index (), t.xelem (3, i));
+                                    mesh->domains ().set_marker (idxvl, D);
+                                    break;
                                  }
                              }
                          }
@@ -208,7 +210,7 @@ the same structure as @var{mesh}\n\
                      {
                        for (uint i = 0; i < num_cells; ++i)
                          {
-                           dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
+                           dolfin::Vertex v (*mesh, t.xelem (0, i) - 1);
                            for (dolfin::CellIterator f (v); ! f.end (); ++f)
                              {
                                if ((*f).entities(0)[0] == t.xelem (0, i) - 1
@@ -311,16 +313,21 @@ the same structure as @var{mesh}\n\
                                     && (*f).entities(0)[2] == t.xelem (1, i) - 1
                                     && (*f).entities(0)[3] == t.xelem (0, i) - 1)
                                  {
-                                   cell.set_value ((*f).index (), t.xelem (4, i), mesh);
-                                   break;
+                                    std::pair <std::size_t, std::size_t>
+                                      idxvl ((*f).index (), t.xelem (4, i));
+                                    mesh->domains ().set_marker (idxvl, D);
+                                    break;
                                  }
                              }
                          }
                      }
 
-                   *(mesh.domains ().markers (D)) = cell;
+                   dolfin::MeshFunction<std::size_t> 
+                     cell (mesh, D, mesh->domains ());
+                   dolfin::MeshFunction<std::size_t> 
+                     facet (mesh, D - 1, mesh->domains ());
 
-                   dolfin::CellFunction<bool> cell_markers (mesh);
+                   dolfin::CellFunction<bool> cell_markers (*mesh);
                    if (nargin == 2)
                      {
                        cell_markers.set_all (false);
@@ -331,8 +338,7 @@ the same structure as @var{mesh}\n\
                      cell_markers.set_all (true);
 
                    boost::shared_ptr<dolfin::Mesh> r_mesh(new dolfin::Mesh ());
-                   dolfin::refine (*r_mesh, mesh, cell_markers);
-                   mesh.clear ();
+                   dolfin::refine (*r_mesh, *mesh, cell_markers);
 
                    std::size_t num_v = (*r_mesh).num_vertices ();
                    dims(0) = D;

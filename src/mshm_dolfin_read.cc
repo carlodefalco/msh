@@ -50,22 +50,22 @@ with matrix fields (p,e,t).\n\
       std::string mesh_to_read = args(0).string_value ();
       if (! error_state)
         {
-          dolfin::Mesh mesh (mesh_to_read);
-          uint D = mesh.topology ().dim ();
+          boost::shared_ptr<dolfin::Mesh> mesh (new dolfin::Mesh (mesh_to_read));
+          uint D = mesh->topology ().dim ();
           if (D < 2 || D > 3)
             error ("mshm_dolfin_read: only 2D or 3D meshes are supported");
           else
             {
               // matrix p
-              std::size_t num_v = mesh.num_vertices ();
+              std::size_t num_v = mesh->num_vertices ();
               Matrix p (D, num_v);
-              std::copy (mesh.coordinates ().begin (),
-                         mesh.coordinates ().end (),
+              std::copy (mesh->coordinates ().begin (),
+                         mesh->coordinates ().end (),
                          p.fortran_vec ());
 
               // e has 7 rows in 2d, 10 rows in 3d
-              mesh.init (D - 1, D);
-              std::size_t num_f = mesh.num_facets ();
+              mesh->init (D - 1, D);
+              std::size_t num_f = mesh->num_facets ();
               dims(0) = D == 2 ? 7 : 10;
               dims(1) = num_f;
               Array<octave_idx_type> e (dims, 0);
@@ -73,12 +73,18 @@ with matrix fields (p,e,t).\n\
               uint D2 = D * D;
               octave_idx_type l = 0, m = 0;
 
-              dolfin::MeshFunction <std::size_t> facet_domains;
-              if (! mesh.domains ().is_empty ())
-                  if (mesh.domains ().num_marked (D-1) != 0)
-                    facet_domains = * (mesh.domains ().facet_domains ());
+              dolfin::MeshFunction <std::size_t> facet_domains (mesh, D - 1);
+              bool empty = true;
+              if (! mesh->domains ().is_empty ())
+                  if (mesh->domains ().num_marked (D-1) != 0)
+                    {
+                      empty = false;
+                      dolfin::MeshFunction<std::size_t> 
+                        facet_domains_tmp (mesh, D - 1, mesh->domains ());
+                      facet_domains = facet_domains_tmp;
+                    }
 
-              for (dolfin::FacetIterator f (mesh); ! f.end (); ++f)
+              for (dolfin::FacetIterator f (*mesh); ! f.end (); ++f)
                 {
                   if ((*f).exterior () == true)
                     {
@@ -86,7 +92,7 @@ with matrix fields (p,e,t).\n\
                       for (dolfin::VertexIterator v (*f); ! v.end (); ++v, ++l)
                         e.xelem (l, m) = (*v).index () + 1;
 
-                      if (! facet_domains.empty ())
+                      if (! empty)
                         e.xelem (D2, m) = facet_domains[*f];
 
                       ++m;
@@ -102,22 +108,29 @@ with matrix fields (p,e,t).\n\
 
               // t matrix
               dims(0) = D + 2;
-              dims(1) = mesh.num_cells ();
+              dims(1) = mesh->num_cells ();
               Array<octave_idx_type> t (dims, 1);
-              std::vector<unsigned int> my_cells = mesh.cells ();
+              std::vector<unsigned int> my_cells = mesh->cells ();
               std::size_t n = 0;
 
+              empty = true;
+              boost::shared_ptr<dolfin::Mesh> msh;
               dolfin::MeshFunction<std::size_t> cell_domains;
-              if (! mesh.domains ().is_empty ())
-                  if (mesh.domains ().num_marked (D) != 0)
-                    cell_domains = * (mesh.domains ().cell_domains ());
+                if (! mesh->domains ().is_empty ())
+                  if (mesh->domains ().num_marked (D) != 0)
+                    {
+                      empty = false;
+                      dolfin::MeshFunction<std::size_t> 
+                        cell_domains_tmp (mesh, D, mesh->domains ());
+                      cell_domains = cell_domains_tmp;
+                    }
 
               for (octave_idx_type j = 0; j < t.cols (); ++j)
                 {
                   for (octave_idx_type i = 0; i < D + 1; ++i, ++n)
                     t.xelem (i, j) += my_cells[n];
 
-                   if (! cell_domains.empty ())
+                   if (! empty)
                      t.xelem (D + 1, j) = cell_domains[j];
                 }
 

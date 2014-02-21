@@ -57,7 +57,7 @@ with matrix fields (p,e,t).\n\
       Array<octave_idx_type> e = a.contents ("e").matrix_value ();
       if (! error_state)
         {
-          dolfin::Mesh mesh;
+          boost::shared_ptr<dolfin::Mesh> mesh (new dolfin::Mesh ());
           std::size_t D = p.rows ();
 
           if (D < 2 || D > 3)
@@ -65,7 +65,7 @@ with matrix fields (p,e,t).\n\
           else
             {
               dolfin::MeshEditor editor;
-              editor.open (mesh, D, D);
+              editor.open (*mesh, D, D);
               editor.init_vertices (p.cols ());
               editor.init_cells (t.cols ());
 
@@ -93,15 +93,15 @@ with matrix fields (p,e,t).\n\
               editor.close ();
 
               // store information associated with e
-              mesh.init (D - 1);
-              dolfin::MeshValueCollection<std::size_t> facet (D - 1);
+              mesh->init (D - 1);
+              dolfin::MeshValueCollection<std::size_t> facet(*mesh, D - 1);
               std::size_t num_side_edges = e.cols ();
 
               if (D == 2)
                 {
                   for (uint i = 0; i < num_side_edges; ++i)
                     {
-                      dolfin::Vertex v (mesh, e.xelem (0, i) - 1);
+                      dolfin::Vertex v (*mesh, e.xelem (0, i) - 1);
                       for (dolfin::FacetIterator f (v); ! f.end (); ++f)
                         {
                           if ((*f).entities(0)[0] == e.xelem (0, i) - 1
@@ -109,20 +109,20 @@ with matrix fields (p,e,t).\n\
                               || (*f).entities(0)[0] == e.xelem (1, i) - 1
                               && (*f).entities(0)[1] == e.xelem (0, i) - 1)
                             {
-                              facet.set_value ((*f).index (), e.xelem (4, i), mesh);
+                              std::pair <std::size_t, std::size_t>
+                                idxvl ((*f).index (), e.xelem (4, i));
+                              mesh->domains ().set_marker (idxvl, D - 1);
                               break;
                             }
                         }
                     }
                 }
 
-
-
               if (D == 3)
                 {
                   for (uint i = 0; i < num_side_edges; ++i)
                     {
-                      dolfin::Vertex v (mesh, e.xelem (0, i) - 1);
+                      dolfin::Vertex v (*mesh, e.xelem (0, i) - 1);
                       for (dolfin::FacetIterator f (v); ! f.end (); ++f)
                         {
                           if ((*f).entities(0)[0] == e(0, i) - 1
@@ -144,24 +144,24 @@ with matrix fields (p,e,t).\n\
                               && (*f).entities(0)[1] == e.xelem (1, i) - 1
                               && (*f).entities(0)[2] == e.xelem (0, i) - 1)
                             {
-                              facet.set_value ((*f).index (), e.xelem (9, i), mesh);
+                              std::pair <std::size_t, std::size_t> 
+                                idxvl ((*f).index (), e.xelem (9, i));
+                              mesh->domains ().set_marker (idxvl, D - 1);
                               break;
                             }
                         }
                     }
                 }
 
-              *(mesh.domains ().markers (D - 1)) = facet;
-
               // store information associated with t
-              dolfin::MeshValueCollection<std::size_t> cell (D);
+              dolfin::MeshValueCollection<std::size_t> cell (*mesh, D);
               std::size_t num_cells = t.cols ();
 
               if (D == 2)
                 {
                   for (uint i = 0; i < num_cells; ++i)
                     {
-                      dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
+                      dolfin::Vertex v (*mesh, t.xelem (0, i) - 1);
                       for (dolfin::CellIterator f (v); ! f.end (); ++f)
                         {
                           if ((*f).entities(0)[0] == t.xelem (0, i) - 1
@@ -183,20 +183,20 @@ with matrix fields (p,e,t).\n\
                               && (*f).entities(0)[1] == t.xelem (1, i) - 1
                               && (*f).entities(0)[2] == t.xelem (0, i) - 1)
                             {
-                              cell.set_value ((*f).index (), t.xelem (3, i), mesh);
+                              std::pair <std::size_t, std::size_t>
+                                idxvl ((*f).index (), t.xelem (3, i));
+                              mesh->domains ().set_marker (idxvl, D);
                               break;
                             }
                         }
                     }
                 }
 
-
-
               if (D == 3)
                 {
                   for (uint i = 0; i < num_cells; ++i)
                     {
-                      dolfin::Vertex v (mesh, t.xelem (0, i) - 1);
+                      dolfin::Vertex v (*mesh, t.xelem (0, i) - 1);
                       for (dolfin::CellIterator f (v); ! f.end (); ++f)
                         {
                           if ((*f).entities(0)[0] == t.xelem (0, i) - 1
@@ -299,17 +299,17 @@ with matrix fields (p,e,t).\n\
                                && (*f).entities(0)[2] == t.xelem (1, i) - 1
                                && (*f).entities(0)[3] == t.xelem (0, i) - 1)
                             {
-                              cell.set_value ((*f).index (), t.xelem (4, i), mesh);
+                              std::pair <std::size_t, std::size_t>
+                                idxvl ((*f).index (), t.xelem (4, i));
+                              mesh->domains ().set_marker (idxvl, D);
                               break;
                             }
                         }
                     }
                 }
 
-              *(mesh.domains ().markers (D)) = cell;
-
               dolfin::File mesh_file (output_mesh + ".xml");
-              mesh_file << mesh;
+              mesh_file << *mesh;
             }
         }
     }
