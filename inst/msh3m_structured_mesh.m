@@ -43,7 +43,7 @@
 ## @item 2nd row: y-coordinates of the points.
 ## @item 3rd row: z-coordinates of the points.
 ## @end itemize
-## @item @var{e}: matrix with size 10 times number of mesh face edges.
+## @item @var{e}: matrix with size 10 times number of mesh boundary triangles.
 ## @itemize @bullet
 ## @item 1st row: number of the first vertex of the face edge.
 ## @item 2nd row: number of the second vertex of the face edge.
