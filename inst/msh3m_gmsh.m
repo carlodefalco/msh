@@ -77,10 +77,10 @@ function [mesh, gmsh_output] = msh3m_gmsh (geometry, varargin)
     printf("Generating mesh...\n");
   endif
 
-  msh_name = strcat (tmpnam (), ".msh");
+  msh_name = strcat (tempname (), ".msh");
   fclose (fopen (msh_name, "w"));
 
-  [status, gmsh_output] = system (["gmsh -format msh -3 -o " msh_name optstring " " geometry ".geo 2>&1"]);
+  [status, gmsh_output] = system (["gmsh -format msh2 -3 -o " msh_name optstring " " geometry ".geo 2>&1"]);
   if (status)
     error ("msh3m_gmsh: the gmesh subprocess exited abnormally");
   endif
@@ -89,7 +89,7 @@ function [mesh, gmsh_output] = msh3m_gmsh (geometry, varargin)
     printf("Processing gmsh data...\n");
   endif
 
-  fname = tmpnam ();
+  fname = tempname ();
   fclose (fopen (strcat (fname, "_e.txt"), "w"));
   e_filename =  canonicalize_file_name (strcat (fname, "_e.txt"));
 
