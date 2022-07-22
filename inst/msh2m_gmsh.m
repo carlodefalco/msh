@@ -78,12 +78,12 @@ function [mesh, gmsh_output] = msh2m_gmsh (geometry, varargin)
   msh_name = strcat (tempname (), ".msh");
   fclose (fopen (msh_name, "w"));
 
-  [status, gmsh_output] = system (["gmsh -format msh -2 -o " msh_name optstring " " geometry ".geo 2>&1 "]);
+  [status, gmsh_output] = system (["gmsh -format msh2 -2 -o " msh_name optstring " " geometry ".geo 2>&1 "]);
   if (status)
     error ("msh2m_gmsh: the gmesh subprocess exited abnormally");
   endif
 
-  fname = tmpnam ();
+  fname = tempname ();
   fclose (fopen (strcat (fname, "_e.txt"), "w"));
   e_filename =  canonicalize_file_name (strcat (fname, "_e.txt"));
 
@@ -171,7 +171,7 @@ endfunction
 %! assert(nnodest,nnodesp);
 
 %!demo
-%! name = [tmpnam ".geo"];
+%! name = [tempname() ".geo"];
 %! fid = fopen (name, "w");
 %! fputs (fid, "Point(1) = {0, 0, 0, .1};\n");
 %! fputs (fid, "Point(2) = {1, 0, 0, .1};\n");
