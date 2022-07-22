@@ -75,7 +75,7 @@ function [mesh, gmsh_output] = msh2m_gmsh (geometry, varargin)
     printf("Generating mesh...\n");
   endif
 
-  msh_name = strcat (tmpnam (), ".msh");
+  msh_name = strcat (tempname (), ".msh");
   fclose (fopen (msh_name, "w"));
 
   [status, gmsh_output] = system (["gmsh -format msh -2 -o " msh_name optstring " " geometry ".geo 2>&1 "]);
