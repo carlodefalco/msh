@@ -403,7 +403,7 @@ function [b] = computearea(p,e,t,string)
   endfor
 
   if string == "wjac"
-    b = wjacdet();
+    b = wjacdet;
   elseif string == "area"
     b = sum(wjacdet)';
   endif
