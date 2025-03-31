@@ -111,7 +111,7 @@ endfunction
 %! assert(elementlist,el);
 
 %!demo
-%! name = [tmpnam ".geo"];
+%! name = [tempname ".geo"];
 %! fid = fopen (name, "w");
 %! fputs (fid, "Point(1) = {0, 0, 0, .1};\n");
 %! fputs (fid, "Point(2) = {1, 0, 0, .1};\n");
